@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- TOOLBAR -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarDetails"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#1E1E1E"
+            app:navigationIcon="@drawable/arrow_back">
+
+            <TextView
+                android:id="@+id/tvToolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="BOOK YOUR TICKET"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- POSTER -->
+        <ImageView
+            android:id="@+id/imgPoster"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop" />
+
+        <!-- TITLE -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Movie Title"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingTop="8dp" />
+
+        <!-- RATING -->
+        <TextView
+            android:id="@+id/tvRating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⭐ 8.5"
+            android:textColor="#FFC107"
+            android:textSize="16sp"
+            android:paddingBottom="12dp" />
+
+        <!-- DATE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Date"
+            android:textColor="#FFFFFF" />
+
+        <Spinner
+            android:id="@+id/spDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- TIME -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Time"
+            android:textColor="#FFFFFF"
+            android:paddingTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- TICKETS -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Number of Tickets"
+            android:textColor="#FFFFFF"
+            android:paddingTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spTicketQty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- SEAT TEXT -->
+        <TextView
+            android:id="@+id/tvSeat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Seat: -"
+            android:textColor="#FFFFFF"
+            android:paddingTop="12dp" />
+
+        <!-- SEAT GRID -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <GridLayout
+                android:id="@+id/gridSeats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="8"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true"
+                android:padding="4dp" />
+        </HorizontalScrollView>
+
+        <!-- PRICE SECTION (GSC STYLE) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="#1E1E1E">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Price per Ticket"
+                    android:textColor="#B0B0B0" />
+
+                <TextView
+                    android:id="@+id/tvPricePerTicket"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RM 15.00"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#333333"
+                android:layout_marginVertical="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total Price"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvTotalPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RM 15.00"
+                    android:textColor="#FFC107"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- PAYMENT -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Payment Method"
+            android:textColor="#FFFFFF"
+            android:paddingTop="16dp" />
+
+        <RadioGroup
+            android:id="@+id/rgPayment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/rbCard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Credit / Debit Card"
+                android:textColor="#FFFFFF" />
+
+            <RadioButton
+                android:id="@+id/rbOnline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Online Banking"
+                android:textColor="#FFFFFF" />
+
+            <RadioButton
+                android:id="@+id/rbEwallet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="E-Wallet"
+                android:textColor="#FFFFFF" />
+        </RadioGroup>
+
+        <!-- CONFIRM -->
+        <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Confirm Booking"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#D32F2F" />
+
+    </LinearLayout>
+</ScrollView>

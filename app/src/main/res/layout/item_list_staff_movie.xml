@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="6dp"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="#1E1E1E">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp">
+
+        <!-- ID -->
+        <TextView
+            android:id="@+id/tvIdLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID : "
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="#FFFFFF"/>
+
+        <TextView
+            android:id="@+id/tvIdValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/tvIdLabel"
+            android:text="1"
+            android:textSize="14sp"
+            android:textColor="#BDBDBD"/>
+
+        <!-- Movie Name -->
+        <TextView
+            android:id="@+id/tvMovieLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvIdLabel"
+            android:layout_marginTop="8dp"
+            android:text="Movie Name : "
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"/>
+
+        <TextView
+            android:id="@+id/tvMovieValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/tvMovieLabel"
+            android:layout_below="@id/tvIdLabel"
+            android:layout_marginTop="8dp"
+            android:text="Avengers Endgame"
+            android:textSize="15sp"
+            android:textColor="#E0E0E0"/>
+
+        <TextView
+            android:id="@+id/tvStaffLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvMovieLabel"
+            android:layout_marginTop="8dp"
+            android:text="Staff Name : "
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"/>
+
+        <TextView
+            android:id="@+id/tvStaffValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/tvStaffLabel"
+            android:layout_below="@id/tvMovieLabel"
+            android:layout_marginTop="8dp"
+            android:text="Ahmad"
+            android:textSize="15sp"
+            android:textColor="#E0E0E0"/>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

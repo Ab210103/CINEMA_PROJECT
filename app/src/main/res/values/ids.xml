@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="imgProfile" type="id" />
+    <item name="tvName" type="id" />
+    <item name="tvEmail" type="id" />
+    <item name="tvPhone" type="id" />
+    <item name="tvGender" type="id" />
+    <item name="tvProfession" type="id" />
+    <item name="btnUpdate" type="id" />
+</resources>
