@@ -24,11 +24,11 @@ public class StaffHomeActivity extends AppCompatActivity {
         btnLogout    = findViewById(R.id.btnLogout);
 
         btnMovieList.setOnClickListener(v -> {
-            //startActivity(new Intent(this, StaffMovieListActivity.class));
+            startActivity(new Intent(this, StaffMovieListActivity.class));
         });
 
         btnProfile.setOnClickListener(v -> {
-            //startActivity(new Intent(this, StaffProfileActivity.class));
+            startActivity(new Intent(this, StaffProfileActivity.class));
         });
 
         btnLogout.setOnClickListener(v -> {

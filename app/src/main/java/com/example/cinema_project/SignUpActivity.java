@@ -2,7 +2,7 @@ package com.example.cinema_project;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,9 +16,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.cinema_project.model.Customer;
-import com.example.cinema_project.model.RegisterResponse;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
+import com.example.cinema_project.sharedpref.SharedPrefManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,11 +26,12 @@ import retrofit2.Response;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private EditText edtName, edtEmail, edtPassword, edtphonenum;
+    private EditText edtName, edtEmail, edtPassword, edtPhone;
     private RadioGroup rgGender;
-    private RadioButton rbMale, rbFemale;
     private Spinner spinnerProfession;
     private Button btnSignUp;
+
+    private CustService custService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,16 +49,14 @@ public class SignUpActivity extends AppCompatActivity {
         // Bind views
         edtName = findViewById(R.id.edtName);
         edtEmail = findViewById(R.id.edtEmail);
-        edtphonenum = findViewById(R.id.edtfon);
+        edtPhone = findViewById(R.id.edtfon);
         edtPassword = findViewById(R.id.edtPassword);
         rgGender = findViewById(R.id.rgGender);
-        rbMale = findViewById(R.id.rbMale);
-        rbFemale = findViewById(R.id.rbFemale);
         spinnerProfession = findViewById(R.id.spinnerProfession);
         btnSignUp = findViewById(R.id.btnSignUp);
 
         // Spinner setup
-        String[] professions = {"Student", "Other"};
+        String[] professions = {"student", "other"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.spinner_item_white,
@@ -66,88 +65,104 @@ public class SignUpActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_white);
         spinnerProfession.setAdapter(adapter);
 
-        // Sign Up button click
-        btnSignUp.setOnClickListener(v -> {
+        // Retrofit service
+        custService = ApiUtils.getCustService();
 
-            String name = edtName.getText().toString().trim();
-            String email = edtEmail.getText().toString().trim();
-            String fon = edtphonenum.getText().toString().trim();
-            String password = edtPassword.getText().toString().trim();
-            String profession = spinnerProfession.getSelectedItem().toString();
+        btnSignUp.setOnClickListener(v -> registerUser());
+    }
 
-            // 🔥 GET GENDER PROPERLY
-            String gender = "";
-            int selectedGenderId = rgGender.getCheckedRadioButtonId();
+    private void registerUser() {
+        String username = edtName.getText().toString().trim();
+        String email = edtEmail.getText().toString().trim();
+        String phone = edtPhone.getText().toString().trim();
+        String password = edtPassword.getText().toString().trim();
+        String profession = spinnerProfession.getSelectedItem().toString().trim().toLowerCase();
 
-            if (selectedGenderId == R.id.rbMale) {
-                gender = "Male";
-            } else if (selectedGenderId == R.id.rbFemale) {
-                gender = "Female";
-            }
+        // Gender check
+        int selectedId = rgGender.getCheckedRadioButtonId();
+        if (selectedId == -1) {
+            Toast.makeText(this, "Please select gender!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        RadioButton selectedGender = findViewById(selectedId);
+        String gender = selectedGender.getText().toString().trim().toLowerCase();
 
-            // 🔥 VALIDATION
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Field validation
+        if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            if (gender.isEmpty()) {
-                Toast.makeText(this, "Please select gender!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Invalid email format!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            if (password.length() < 5) {
-                Toast.makeText(this, "Password must be at least 5 characters!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (password.length() < 5) {
+            Toast.makeText(this, "Password must be at least 5 characters!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            // 🔥 Retrofit API call (NO Customer object needed)
-            CustService service = ApiUtils.getCustService();
+        btnSignUp.setEnabled(false);
 
-            Call<RegisterResponse> call = service.signUp(
-                    name,
-                    email,
-                    fon,
-                    password,
-                    gender,
-                    profession
-            );
+        // Debug log
+        Log.d("REGISTER_DATA", email + ", " + username + ", " + phone + ", " + gender + ", " + profession);
 
-            call.enqueue(new Callback<>() {
-                @Override
-                public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+        // API call
+        Call<Customer> call = custService.signUp(
+                email,
+                username,
+                password,
+                phone,
+                gender,
+                profession
+        );
 
-                    if (response.isSuccessful() && response.body() != null) {
+        call.enqueue(new Callback<Customer>() {
+            @Override
+            public void onResponse(Call<Customer> call, Response<Customer> response) {
+                btnSignUp.setEnabled(true);
 
-                        if ("success".equalsIgnoreCase(response.body().getStatus())) {
-                            Toast.makeText(SignUpActivity.this,
-                                    "Sign Up Successful!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Toast.makeText(SignUpActivity.this,
-                                    response.body().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                if (response.isSuccessful() && response.body() != null) {
+                    Customer user = response.body();
 
-                    } else {
-                        Toast.makeText(SignUpActivity.this,
-                                "Server Error " + response.code(), Toast.LENGTH_SHORT).show();
-                    }
-                }
+                    // Save user to SharedPref
+                    SharedPrefManager.getInstance(SignUpActivity.this).storeUser(user);
 
-                @Override
-                public void onFailure(Call<RegisterResponse> call, Throwable t) {
                     Toast.makeText(SignUpActivity.this,
-                            "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            "Welcome " + user.getUsername() + "! Registration successful 🎉",
+                            Toast.LENGTH_SHORT).show();
+
+                    // Navigate based on role
+                    Intent intent;
+                    if ("staff".equalsIgnoreCase(user.getRole())) {
+                        intent = new Intent(SignUpActivity.this, StaffHomeActivity.class);
+                    } else {
+                        intent = new Intent(SignUpActivity.this, MenuActivity.class);
+                    }
+
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+
+                } else {
+                    Toast.makeText(SignUpActivity.this,
+                            "Registration failed. Code: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(Call<Customer> call, Throwable t) {
+                btnSignUp.setEnabled(true);
+                Toast.makeText(SignUpActivity.this,
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-    // Toolbar back button
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();
             return true;

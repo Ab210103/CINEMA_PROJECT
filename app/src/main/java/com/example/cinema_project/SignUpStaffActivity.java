@@ -1,5 +1,6 @@
 package com.example.cinema_project;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,7 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.cinema_project.model.RegisterResponse;
+import com.example.cinema_project.model.Customer;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 
@@ -24,21 +25,20 @@ public class SignUpStaffActivity extends AppCompatActivity {
     private RadioGroup rgGender;
     private Button btnSignUp;
 
+    private CustService custService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_staff);
 
-        // Toolbar with back button
         Toolbar toolbar = findViewById(R.id.toolbarSignUpStaff);
         setSupportActionBar(toolbar);
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        // Bind views
         edtName = findViewById(R.id.edtName);
         edtEmail = findViewById(R.id.edtEmail);
         edtPhone = findViewById(R.id.edtphones);
@@ -46,56 +46,86 @@ public class SignUpStaffActivity extends AppCompatActivity {
         rgGender = findViewById(R.id.rgGender);
         btnSignUp = findViewById(R.id.btnSignUp);
 
-        // Sign Up button click
+        custService = ApiUtils.getCustService();
+
         btnSignUp.setOnClickListener(v -> registerStaff());
     }
 
     private void registerStaff() {
-        // Get user inputs
-        String name = edtName.getText().toString().trim();
+        String username = edtName.getText().toString().trim();
         String email = edtEmail.getText().toString().trim();
         String phone = edtPhone.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
 
-        // Validate fields
-        if (name.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+        // Field validation
+        if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate gender
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, "Invalid email format!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (password.length() < 5) {
+            Toast.makeText(this, "Password must be at least 5 characters!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Gender check
         int selectedId = rgGender.getCheckedRadioButtonId();
         if (selectedId == -1) {
             Toast.makeText(this, "Please select gender!", Toast.LENGTH_SHORT).show();
             return;
         }
+
         RadioButton selectedGender = findViewById(selectedId);
-        String gender = selectedGender.getText().toString();
+        String gender = selectedGender.getText().toString().trim().toLowerCase();
 
-        // Profession fixed as staff
-        String profession = "staff";
+        String profession = "staff"; // hardcoded
 
-        // Use ApiUtils to get CustService
-        CustService service = ApiUtils.getCustService();
-        Call<RegisterResponse> call = service.signUp(name, email, phone, password, gender, profession);
+        btnSignUp.setEnabled(false);
 
-        call.enqueue(new Callback<RegisterResponse>() {
+        // API call
+        Call<Customer> call = custService.signUp(
+                email,
+                username,
+                password,
+                phone,
+                gender,
+                profession
+        );
+
+        call.enqueue(new Callback<Customer>() {
             @Override
-            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+            public void onResponse(Call<Customer> call, Response<Customer> response) {
+                btnSignUp.setEnabled(true);
+
                 if (response.isSuccessful() && response.body() != null) {
+                    Customer staff = response.body();
+
                     Toast.makeText(SignUpStaffActivity.this,
-                            "Staff registered successfully!", Toast.LENGTH_SHORT).show();
-                    finish(); // go back to previous activity
+                            "Welcome " + staff.getUsername() + "! Staff registered successfully 👔",
+                            Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(SignUpStaffActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+
                 } else {
                     Toast.makeText(SignUpStaffActivity.this,
-                            "Registration failed! Code: " + response.code(), Toast.LENGTH_SHORT).show();
+                            "Registration failed. Code: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+            public void onFailure(Call<Customer> call, Throwable t) {
+                btnSignUp.setEnabled(true);
                 Toast.makeText(SignUpStaffActivity.this,
-                        "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }

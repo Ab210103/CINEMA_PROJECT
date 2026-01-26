@@ -1,168 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
+    android:fillViewport="true"
     android:padding="16dp">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarAddMovie"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#1E1E1E"
-        app:title="UPDATE MOVIE"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/arrow_back" />
-
-    <!-- Card Form -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardAddMovie"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbarAddMovie"
-        android:layout_marginTop="20dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="#1E1E1E">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarUpdateMovie"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#1E1E1E"
+            app:title="UPDATE MOVIE"
+            app:titleTextColor="#FFFFFF"
+            app:navigationIcon="@drawable/arrow_back" />
+
+        <!-- Card Form -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardUpdateMovie"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="#1E1E1E">
 
-            <!-- Title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Update Movie"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:gravity="center"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Update movie information"
-                android:textSize="14sp"
-                android:textColor="#BDBDBD"
-                android:gravity="center"
-                android:layout_marginBottom="16dp"/>
-
-            <!-- Movie Title -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Title -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="DETAILS"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"/>
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="Movie Title"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"/>
+                    android:text="Update movie information"
+                    android:textSize="14sp"
+                    android:textColor="#BDBDBD"
+                    android:gravity="center"
+                    android:layout_marginBottom="16dp"/>
 
-                <EditText
-                    android:id="@+id/etMovieTitle"
-                    android:layout_width="0dp"
+                <!-- Movie Title -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#FF5252"/>
-            </LinearLayout>
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
 
-            <!-- Movie Description -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="Movie Title"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"/>
 
+                    <EditText
+                        android:id="@+id/etMovieTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#FF5252"/>
+                </LinearLayout>
+
+                <!-- Description -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="Description"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"/>
+
+                    <EditText
+                        android:id="@+id/etMovieDesc"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:inputType="textMultiLine"
+                        android:minLines="2"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#FF5252"/>
+                </LinearLayout>
+
+                <!-- Genre -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="Genre"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"/>
+
+                    <EditText
+                        android:id="@+id/etMovieGenre"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#FF5252"/>
+                </LinearLayout>
+
+                <!-- Length -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.35"
+                        android:text="Length (min)"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"/>
+
+                    <EditText
+                        android:id="@+id/etMovieLength"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:inputType="number"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#FF5252"/>
+                </LinearLayout>
+
+                <!-- Banner -->
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="Description"
+                    android:text="Movie Banner"
                     android:textColor="#FFFFFF"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
 
-                <EditText
-                    android:id="@+id/etMovieDesc"
-                    android:layout_width="0dp"
+                <ImageView
+                    android:id="@+id/imgBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:background="#2A2A2A"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background"/>
+
+                <Button
+                    android:id="@+id/btnUploadBanner"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:textColor="#FFFFFF"
-                    android:inputType="textMultiLine"
-                    android:minLines="2"
-                    android:backgroundTint="#FF5252"/>
-            </LinearLayout>
+                    android:text="UPLOAD BANNER"
+                    android:layout_marginBottom="16dp"
+                    android:backgroundTint="#424242"
+                    android:textColor="#FFFFFF"/>
 
-            <!-- Movie Genre -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
-
+                <!-- Poster -->
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="Genre"
+                    android:text="Movie Poster"
                     android:textColor="#FFFFFF"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
 
-                <EditText
-                    android:id="@+id/etMovieGenre"
-                    android:layout_width="0dp"
+                <ImageView
+                    android:id="@+id/imgPoster"
+                    android:layout_width="120dp"
+                    android:layout_height="180dp"
+                    android:layout_gravity="center"
+                    android:background="#2A2A2A"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background"/>
+
+                <Button
+                    android:id="@+id/btnUploadPoster"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#FF5252"/>
+                    android:text="UPLOAD POSTER"
+                    android:layout_marginBottom="20dp"
+                    android:backgroundTint="#424242"
+                    android:textColor="#FFFFFF"/>
+
+                <!-- Add Movie Button -->
+                <Button
+                    android:id="@+id/btnUpdateMovie"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Update MOVIE"
+                    android:textStyle="bold"
+                    android:backgroundTint="#E50914"
+                    android:textColor="#FFFFFF"/>
+
             </LinearLayout>
 
-            <!-- Movie Length -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="20dp">
+        </androidx.cardview.widget.CardView>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.35"
-                    android:text="Length (min)"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"/>
+    </LinearLayout>
 
-                <EditText
-                    android:id="@+id/etMovieLength"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.65"
-                    android:textColor="#FFFFFF"
-                    android:inputType="number"
-                    android:backgroundTint="#FF5252"/>
-            </LinearLayout>
-
-            <!-- Button -->
-            <Button
-                android:id="@+id/btnAddMovie"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Update MOVIE"
-                android:textStyle="bold"
-                android:backgroundTint="#E50914"
-                android:textColor="#FFFFFF"/>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-</RelativeLayout>
+</ScrollView>

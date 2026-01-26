@@ -48,29 +48,21 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:paddingTop="8dp" />
-
-        <!-- RATING -->
-        <TextView
-            android:id="@+id/tvRating"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⭐ 8.5"
-            android:textColor="#FFC107"
-            android:textSize="16sp"
-            android:paddingBottom="12dp" />
+            android:paddingTop="8dp"
+            android:paddingBottom="15dp"/>
 
         <!-- DATE -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Select Date"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"/>
 
         <Spinner
             android:id="@+id/spDate"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFFFFF"/>
 
         <!-- TIME -->
         <TextView
@@ -83,7 +75,8 @@
         <Spinner
             android:id="@+id/spTime"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFFFFF"/>
 
         <!-- TICKETS -->
         <TextView
@@ -96,7 +89,8 @@
         <Spinner
             android:id="@+id/spTicketQty"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:backgroundTint="#FFFFFF"/>
 
         <!-- SEAT TEXT -->
         <TextView

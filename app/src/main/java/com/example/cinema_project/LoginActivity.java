@@ -1,34 +1,23 @@
 package com.example.cinema_project;
 
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
+import android.util.Patterns;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.cinema_project.model.Customer;
-import com.example.cinema_project.model.FailLogin;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 import com.example.cinema_project.sharedpref.SharedPrefManager;
-import com.google.gson.Gson;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,183 +25,130 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText edtUsername;
-    private EditText edtPassword;
-    private ProgressBar progressBar;
-    private TextView textViewRegister;
+    private EditText edtLogin, edtPassword;
+    private Button btnLogin;
     private RadioGroup rgUserType;
     private RadioButton rbCustomer, rbStaff;
+    private TextView tvRegister;
+
+    private CustService custService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
+        // Auto-redirect if already logged in
+        if (SharedPrefManager.getInstance(this).isLoggedIn()) {
+            startActivity(new Intent(this, MenuActivity.class));
+            finish();
+            return;
+        }
+
+        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarLogin);
         setSupportActionBar(toolbar);
-
-        // Enable back button
-        if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // show back button
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        // get references to form elements
-        edtUsername = findViewById(R.id.edtUsername);
+        // Bind views
+        edtLogin = findViewById(R.id.edtUsername);       // Name or Email
         edtPassword = findViewById(R.id.edtPassword);
-        textViewRegister = findViewById(R.id.textViewRegister);
-        rgUserType = findViewById(R.id.rgUserType);
+        btnLogin = findViewById(R.id.btnLogin);
+        rgUserType = findViewById(R.id.rgUserType);   // RadioGroup for Customer/Staff
         rbCustomer = findViewById(R.id.rbCustomer);
         rbStaff = findViewById(R.id.rbStaff);
-        progressBar = findViewById(R.id.progressBar);
-        progressBar.setVisibility(GONE);
+        tvRegister = findViewById(R.id.textViewRegister);   // TextView "Register Here"
 
-        textViewRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent;
-                if (rbCustomer.isChecked()) {
-                    // Pergi SignupCustomerActivity
-                    intent = new Intent(LoginActivity.this, SignUpActivity.class);
-                } else {
-                    // Pergi SignupStaffActivity
-                    intent = new Intent(LoginActivity.this, SignUpStaffActivity.class);
-                }
-                startActivity(intent);
+        custService = ApiUtils.getCustService();
+
+        // Login button click
+        btnLogin.setOnClickListener(v -> doLogin());
+
+        // Register TextView click
+        tvRegister.setOnClickListener(v -> {
+            if (rbCustomer.isChecked()) {
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+            } else if (rbStaff.isChecked()) {
+                startActivity(new Intent(LoginActivity.this, SignUpStaffActivity.class));
+            } else {
+                Toast.makeText(this, "Please select Customer or Staff", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // Handle back button click
+    // Handle toolbar back button click
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == android.R.id.home){
-            // Back to HomeFragment
-            onBackPressed(); //close LoginActivity
+    public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Navigate to MenuActivity instead of finishing
+            Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-    /**
-     * Login button action handler
-     */
-    public void loginClicked(View view) {
 
-        // get username and password entered by user
-        String username = edtUsername.getText().toString();
-        String password = edtPassword.getText().toString();
 
-        // validate form, make sure it is not empty
-        if (validateLogin(username, password)) {
-            // if not empty, login using REST API
-            doLogin(username, password);
+    private void doLogin() {
+        String login = edtLogin.getText().toString().trim();
+        String password = edtPassword.getText().toString().trim();
+
+        if (login.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-    }
+        btnLogin.setEnabled(false);
 
-    /**
-     * Call REST API to login
-     *
-     * @param username username
-     * @param password password
-     */
-    private void doLogin(String username, String password) {
-
-        // get UserService instance
-        CustService custService = ApiUtils.getCustService();
-
-        // prepare the REST API call using the service interface
         Call<Customer> call;
-        if (username.contains("@")) {
-            call = custService.loginEmail(username, password);
+
+        if (Patterns.EMAIL_ADDRESS.matcher(login).matches()) {
+            call = custService.loginEmail(login, password);
         } else {
-            call = custService.login(username, password);
+            call = custService.login(login, password);
         }
 
-        // display progress Bar
-        progressBar.setVisibility(VISIBLE);
-
-        // execute the REST API call
         call.enqueue(new Callback<Customer>() {
-
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call<Customer> call, Response<Customer> response) {
+                btnLogin.setEnabled(true);
 
-                // set progress bar to gone
-                progressBar.setVisibility(GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    Customer user = response.body();
+                    SharedPrefManager.getInstance(LoginActivity.this).storeUser(user);
 
-                if (response.isSuccessful()) {  // code 200
-                    // parse response to POJO
-                    Customer user = (Customer) response.body();
-                    if (user != null ) {
-                        // successful login. server replies a token value
-                        displayToast("Login successful");
+                    Toast.makeText(LoginActivity.this,
+                            "Welcome " + user.getUsername() + " 👋",
+                            Toast.LENGTH_SHORT).show();
 
-                        // store value in Shared Preferences
-                        SharedPrefManager spm = new SharedPrefManager(getApplicationContext());
-                        spm.storeUser(user);
-
-                        // forward user to MenuActivity
-                        finish();
-                        Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
-                        startActivity(intent);
-
+                    Intent intent;
+                    if (rbStaff.isChecked()) {
+                        intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
                     } else {
-                        // server return success but no user info replied
-                        displayToast("Login error");
+                        intent = new Intent(LoginActivity.this, MenuActivity.class);
                     }
-                } else {  // other than 200
-                    // try to parse the response to FailLogin POJO
-                    String errorResp = null;
-                    try {
-                        errorResp = response.errorBody().string();
-                        FailLogin e = new Gson().fromJson(errorResp, FailLogin.class);
-                        displayToast(e.getError().getMessage());
-                    } catch (Exception e) {
-                        Log.e("MyApp:", e.toString()); // print error details to error log
-                        displayToast("Error");
-                    }
+
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+
+                } else {
+                    Toast.makeText(LoginActivity.this,
+                            "Login failed. Invalid credentials.",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
-
-                // set progress bar to gone
-                progressBar.setVisibility(GONE);
-
-                displayToast("Error connecting to server.");
-                displayToast(t.getMessage());
-                Log.e("MyApp:", t.toString()); // print error details to error log
+            public void onFailure(Call<Customer> call, Throwable t) {
+                btnLogin.setEnabled(true);
+                Toast.makeText(LoginActivity.this,
+                        "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-    /**
-     * Validate value of username and password entered. Client side validation.
-     * @param username
-     * @param password
-     * @return
-     */
-    private boolean validateLogin(String username, String password) {
-        if (username == null || username.trim().isEmpty()) {
-            displayToast("Username is required");
-            return false;
-        }
-        if (password == null || password.trim().isEmpty()) {
-            displayToast("Password is required");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Display a Toast message
-     * @param message message to be displayed inside toast
-     */
-    public void displayToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
 }

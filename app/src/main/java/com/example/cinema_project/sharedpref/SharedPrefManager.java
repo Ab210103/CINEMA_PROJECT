@@ -1,83 +1,83 @@
 package com.example.cinema_project.sharedpref;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 
-import com.example.cinema_project.model.Customer;
-import com.example.cinema_project.LoginActivity;
 import com.example.cinema_project.model.Customer;
 
 public class SharedPrefManager {
 
-    //the constants
-    private static final String SHARED_PREF_NAME = "bookstoresharedpref";
-    private static final String KEY_ID = "keyid";
-    private static final String KEY_USERNAME = "keyusername";
-    private static final String KEY_EMAIL = "keyemail";
-    private static final String KEY_TOKEN = "keytoken";
-    private static final String KEY_ROLE = "keyrole";
-    private static final String KEY_GENDER = "keygender";
-    private static final String KEY_PROFF = "keyprofession";
+    private static final String SHARED_PREF_NAME = "cinema_shared_pref";
 
+    private static final String KEY_ID = "key_id";
+    private static final String KEY_USERNAME = "key_username";
+    private static final String KEY_EMAIL = "key_email";
+    private static final String KEY_TOKEN = "key_token";
+    private static final String KEY_ROLE = "key_role";
+    private static final String KEY_GENDER = "key_gender";
+    private static final String KEY_PROFESSION = "key_profession";
+    private static final String KEY_PHONE = "key_phone";
+
+    private static SharedPrefManager mInstance;
     private final Context mCtx;
 
     public SharedPrefManager(Context context) {
-        mCtx = context;
+        mCtx = context.getApplicationContext();
     }
 
-    /**
-     * method to let the user login
-     * this method will store the user data in shared preferences
-     * @param user
-     */
+    public static synchronized SharedPrefManager getInstance(Context context) {
+        if (mInstance == null) {
+            mInstance = new SharedPrefManager(context);
+        }
+        return mInstance;
+    }
+
     public void storeUser(Customer user) {
-        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences sp = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+
         editor.putInt(KEY_ID, user.getId());
         editor.putString(KEY_USERNAME, user.getUsername());
         editor.putString(KEY_EMAIL, user.getEmail());
         editor.putString(KEY_TOKEN, user.getToken());
         editor.putString(KEY_ROLE, user.getRole());
         editor.putString(KEY_GENDER, user.getGender());
-        editor.putString(KEY_PROFF, user.getProfession());
+        editor.putString(KEY_PROFESSION, user.getProfession());
+        editor.putString(KEY_PHONE, user.getPhoneNumber());
+
         editor.apply();
     }
 
-    /**
-     * this method will checker whether user is already logged in or not.
-     * return True if already logged in
-     */
-
     public boolean isLoggedIn() {
-        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(KEY_USERNAME, null) != null;
+        SharedPreferences sp = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        String token = sp.getString(KEY_TOKEN, null);
+        return token != null && !token.isEmpty();
     }
 
-    /**
-     * this method will give the information of logged in user, retrieved from SharedPreferences
-     */
     public Customer getUser() {
-        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sp = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         Customer user = new Customer();
-        user.setId(sharedPreferences.getInt(KEY_ID, -1));
-        user.setUsername(sharedPreferences.getString(KEY_USERNAME, null));
-        user.setEmail(sharedPreferences.getString(KEY_EMAIL, null));
-        user.setToken(sharedPreferences.getString(KEY_TOKEN, null));
-        user.setRole(sharedPreferences.getString(KEY_ROLE, null));
-        user.setGender(sharedPreferences.getString(KEY_GENDER,null));
-        user.setProfession(sharedPreferences.getString(KEY_PROFF,null));
+        user.setId(sp.getInt(KEY_ID, -1));
+        user.setUsername(sp.getString(KEY_USERNAME, null));
+        user.setEmail(sp.getString(KEY_EMAIL, null));
+        user.setToken(sp.getString(KEY_TOKEN, null));
+        user.setRole(sp.getString(KEY_ROLE, null));
+        user.setGender(sp.getString(KEY_GENDER, null));
+        user.setProfession(sp.getString(KEY_PROFESSION, null));
+        user.setPhoneNumber(sp.getString(KEY_PHONE, null));
 
         return user;
     }
 
-    /**
-     * this method will logout the user. clear the SharedPreferences
-     */
+    public String getToken() {
+        SharedPreferences sp = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        return sp.getString(KEY_TOKEN, null);
+    }
+
     public void logout() {
-        SharedPreferences sharedPreferences = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences sp = mCtx.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
         editor.clear();
         editor.apply();
     }
