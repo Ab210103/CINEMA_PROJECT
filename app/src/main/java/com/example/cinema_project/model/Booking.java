@@ -8,44 +8,41 @@ public class Booking {
     private String seat;
     private String PaymentType;
     private double TotalPrice;
-    private int user_id;
-    private int movie_code;
+    private Customer user;
+    private Movie movie_code;
 
 
-    public String getSeat() {
-        return seat;
+    public Customer getUser() {
+        return user;
     }
 
-    public void setSeat(String seat) {
-        this.seat = seat;
-    }
-
-    public int getMcode() {
+    public Movie getMovie_code() {
         return movie_code;
     }
 
-    public void setMcode(int mcode) {
-        this.movie_code = mcode;
+    // ✅ ADD THESE HELPERS
+    public int getUserid() {
+        return user != null ? user.getId() : 0;
     }
 
-    public void setBId(int id) {
-        this.BookingID = id;
+    public int getMcode() {
+        return movie_code != null ? movie_code.getId() : 0;
+    }
+
+    public String getMovieTitle() {
+        return movie_code != null ? movie_code.getTitle() : "Unknown Movie";
+    }
+
+    public String getSeat() {
+        return seat;
     }
 
     public int getBId() {
         return BookingID;
     }
 
-    public void setDate(String date) {
-        this.BookingDate = date;
-    }
-
     public String getDate() {
         return BookingDate;
-    }
-
-    public void setTime(String time) {
-        this.BookingTime = time;
     }
 
     public String getTime() {
@@ -56,31 +53,11 @@ public class Booking {
         return TicketQuantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.TicketQuantity = quantity;
-    }
-
     public String getTypepayment() {
         return PaymentType;
     }
 
-    public void setTypepayment(String typepayment) {
-        this.PaymentType = typepayment;
-    }
-
     public double getTotal() {
         return TotalPrice;
-    }
-
-    public void setTotal(double total) {
-        this.TotalPrice = total;
-    }
-
-    public void setUserid(int userid) {
-        this.user_id = userid;
-    }
-
-    public int getUserid() {
-        return user_id;
     }
 }

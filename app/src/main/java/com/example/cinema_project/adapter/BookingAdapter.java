@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,35 +14,52 @@ import com.example.cinema_project.model.Booking;
 import com.example.cinema_project.model.Movie;
 
 import java.util.List;
-import java.util.Map;
 
-public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingViewHolder> {
+public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.ViewHolder> {
 
-    private final List<Booking> bookingList;
-    private final Map<Integer, Movie> movieMap; // movie_code -> Movie
+    private List<Booking> bookingList;
 
-    public BookingAdapter(List<Booking> bookingList, Map<Integer, Movie> movieMap) {
+    public BookingAdapter(List<Booking> bookingList) {
         this.bookingList = bookingList;
-        this.movieMap = movieMap;
     }
 
     @NonNull
     @Override
-    public BookingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BookingAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                        int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_history, parent, false);
-        return new BookingViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BookingViewHolder holder, int position) {
-        Booking booking = bookingList.get(position);
-        Movie movie = movieMap.get(booking.getMcode());
+    public void onBindViewHolder(@NonNull BookingAdapter.ViewHolder holder,
+                                 int position) {
 
-        holder.tvid1.setText(String.valueOf(booking.getBId()));
-        holder.tvproductname1.setText(movie != null ? movie.getTitle() : "Unknown Movie");
-        holder.tvdate1.setText(booking.getDate());
-        holder.tvtime1.setText(booking.getTime());
+        Booking booking = bookingList.get(position);
+
+        holder.tvBookingId.setText("Booking #" + booking.getBId());
+        holder.tvDate.setText("Date: " + booking.getDate());
+        holder.tvTime.setText("Time: " + booking.getTime());
+        holder.tvSeat.setText("Seat: " + booking.getSeat());
+        holder.tvQuantity.setText("Tickets: " + booking.getQuantity());
+        holder.tvPayment.setText("Payment: " + booking.getTypepayment());
+        holder.tvTotal.setText("RM " + String.format("%.2f", booking.getTotal()));
+
+        // 🎬 Movie Info
+        Movie movie = booking.getMovie_code();
+        if (movie != null) {
+            holder.tvNameMovie.setText("Movie: " + movie.getTitle());
+        } else {
+            holder.tvNameMovie.setText("Movie: Unknown");
+        }
+
+        // 🖱️ Click on card
+        holder.itemView.setOnClickListener(v -> {
+            Toast.makeText(v.getContext(),
+                    "Booking ID: " + booking.getBId(),
+                    Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override
@@ -49,15 +67,21 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         return bookingList.size();
     }
 
-    static class BookingViewHolder extends RecyclerView.ViewHolder {
-        TextView tvid1, tvproductname1, tvdate1, tvtime1;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public BookingViewHolder(@NonNull View itemView) {
+        TextView tvBookingId, tvTotal, tvNameMovie,
+                tvDate, tvTime, tvSeat, tvQuantity, tvPayment;
+
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvid1 = itemView.findViewById(R.id.tvid1);
-            tvproductname1 = itemView.findViewById(R.id.tvproductname1);
-            tvdate1 = itemView.findViewById(R.id.tvdate1);
-            tvtime1 = itemView.findViewById(R.id.tvtime1);
+            tvBookingId = itemView.findViewById(R.id.tvBookingId);
+            tvTotal     = itemView.findViewById(R.id.tvTotal);
+            tvNameMovie = itemView.findViewById(R.id.tvnamemovie);
+            tvDate      = itemView.findViewById(R.id.tvDate);
+            tvTime      = itemView.findViewById(R.id.tvTime);
+            tvSeat      = itemView.findViewById(R.id.tvSeat);
+            tvQuantity  = itemView.findViewById(R.id.tvQuantity);
+            tvPayment   = itemView.findViewById(R.id.tvPayment);
         }
     }
 }

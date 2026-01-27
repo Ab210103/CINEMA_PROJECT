@@ -7,6 +7,8 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.cinema_project.sharedpref.SharedPrefManager;
+
 public class StaffHomeActivity extends AppCompatActivity {
 
     private Button btnMovieList, btnProfile, btnLogout;
@@ -32,10 +34,17 @@ public class StaffHomeActivity extends AppCompatActivity {
         });
 
         btnLogout.setOnClickListener(v -> {
+            // 🔥 Clear SharedPreferences & reset singleton
+            SharedPrefManager.getInstance(this).logout();
+
+            // Start LoginActivity dan clear backstack
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+
+            // finish StaffHomeActivity supaya tidak ada di backstack
             finish();
         });
+
     }
 }

@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
 import com.example.cinema_project.model.FileInfo;
 import com.example.cinema_project.model.Movie;
 import com.example.cinema_project.remote.ApiUtils;
@@ -55,10 +56,11 @@ public class UpdateMovieActivity extends AppCompatActivity {
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarUpdateMovie);
-        toolbar.setNavigationOnClickListener(v -> {
-            startActivity(new Intent(UpdateMovieActivity.this, StaffHomeActivity.class));
-            finish();
-        });
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Update Movie");
+        }
 
         // Views
         etTitle = findViewById(R.id.etMovieTitle);
@@ -75,7 +77,7 @@ public class UpdateMovieActivity extends AppCompatActivity {
         btnUploadBanner.setOnClickListener(v -> pickImage(PICK_BANNER));
         btnUploadPoster.setOnClickListener(v -> pickImage(PICK_POSTER));
 
-        // Load movie
+        // Load movie ID from intent
         int movieId = getIntent().getIntExtra("movie_id", -1);
         if (movieId != -1) loadMovie(movieId);
 
@@ -89,6 +91,13 @@ public class UpdateMovieActivity extends AppCompatActivity {
                 updateMovieRecord();
             }
         });
+    }
+
+    // Toolbar back button
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish(); // simply finish this activity to go back
+        return true;
     }
 
     private void pickImage(int requestCode) {
@@ -111,35 +120,56 @@ public class UpdateMovieActivity extends AppCompatActivity {
         }
     }
 
+    // Load movie and prefill form
     private void loadMovie(int movieId) {
         String token = SharedPrefManager.getInstance(this).getUser().getToken();
-        MovieService movieService = ApiUtils.getMovieService();
-        movieService.getMovie(token, movieId).enqueue(new Callback<Movie>() {
+        ApiUtils.getMovieService().getMovie(token, movieId).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     movie = response.body();
+
+                    // Prefill form fields
                     etTitle.setText(movie.getTitle());
                     etDesc.setText(movie.getDescription());
                     etGenre.setText(movie.getGenre());
                     etLength.setText(String.valueOf(movie.getLength()));
+
                     bannerFileName = movie.getImageBanner();
                     posterFileName = movie.getImagePoster();
+
+                    // Load images with Glide
+                    if (bannerFileName != null && !bannerFileName.isEmpty()) {
+                        Glide.with(UpdateMovieActivity.this)
+                                .load(ApiUtils.UPLOADS_URL + bannerFileName)
+                                .into(imgBanner);
+                    }
+                    if (posterFileName != null && !posterFileName.isEmpty()) {
+                        Glide.with(UpdateMovieActivity.this)
+                                .load(ApiUtils.UPLOADS_URL + posterFileName)
+                                .into(imgPoster);
+                    }
                 } else if (response.code() == 401) {
-                    Toast.makeText(UpdateMovieActivity.this, "Session expired", Toast.LENGTH_SHORT).show();
-                    SharedPrefManager.getInstance(UpdateMovieActivity.this).logout();
-                    startActivity(new Intent(UpdateMovieActivity.this, LoginActivity.class));
-                    finish();
+                    handleSessionExpired();
                 } else {
                     Toast.makeText(UpdateMovieActivity.this, "Error loading movie", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onFailure(Call<Movie> call, Throwable t) {
                 Toast.makeText(UpdateMovieActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+    // Handle session expired
+    private void handleSessionExpired() {
+        Toast.makeText(UpdateMovieActivity.this, "Session expired. Please login again.", Toast.LENGTH_SHORT).show();
+        SharedPrefManager.getInstance(this).logout();
+        startActivity(new Intent(UpdateMovieActivity.this, LoginActivity.class));
+        finish();
+    }
+
 
     private void uploadFile(Uri fileUri, boolean isBanner) {
         try {
