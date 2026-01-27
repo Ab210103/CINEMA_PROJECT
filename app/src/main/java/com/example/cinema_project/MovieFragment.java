@@ -2,9 +2,12 @@ package com.example.cinema_project;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.AlertDialog;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,14 +15,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.cinema_project.adapter.MovieAdapter;
 import com.example.cinema_project.model.Movie;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.MovieService;
+import com.example.cinema_project.sharedpref.SharedPrefManager;
 
 import java.util.List;
 
@@ -30,6 +30,7 @@ import retrofit2.Response;
 public class MovieFragment extends Fragment {
 
     private RecyclerView rvMovies;
+    private List<Movie> movieList;
 
     public MovieFragment() {}
 
@@ -53,58 +54,86 @@ public class MovieFragment extends Fragment {
     }
 
     private void fetchMoviesFromApi() {
-        MovieService apiService = ApiUtils.getMovieService();
-        Call<List<Movie>> call = apiService.getAllMovie("YOUR_API_KEY_HERE");
+        MovieService movieService = ApiUtils.getMovieService();
+        boolean isLoggedIn = SharedPrefManager.getInstance(requireContext()).isLoggedIn();
+
+        // Use token if logged in, otherwise fallback token
+        String apiKey = isLoggedIn ? SharedPrefManager.getInstance(requireContext()).getToken() : null;
+        String tetoken = "1cd4b43d-e4e1-4920-9805-cc3f6826d969";
+
+        Call<List<Movie>> call;
+        if (apiKey != null) {
+            call = movieService.getAllMovie(apiKey);
+        } else {
+            call = movieService.getAllMovie(tetoken);
+        }
 
         call.enqueue(new Callback<List<Movie>>() {
             @Override
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Movie> movieList = response.body();
+                if (!isAdded()) return;
 
-                    MovieAdapter adapter = new MovieAdapter(
-                            getContext(),
-                            movieList,
-                            true,
-                            R.layout.item_movie,
-                            R.id.imgPoster,
-                            R.id.tvTitle,
-                            R.id.btnBookNow,
-                            movie -> {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    movieList = response.body();
 
-                                // 🔐 CHECK LOGIN STATUS
-                                if (!isUserLoggedIn()) {
-                                    showLoginDialog();
-                                    return;
-                                }
+                    // Append full URL for banner & poster
+                    for (Movie m : movieList) {
+                        if (m.getImageBanner() != null) {
+                            m.setImageBanner(ApiUtils.UPLOADS_URL + m.getImageBanner());
+                        }
+                        if (m.getImagePoster() != null) {
+                            m.setImagePoster(ApiUtils.UPLOADS_URL + m.getImagePoster());
+                        }
+                    }
 
-                                // ✅ Kalau dah login → terus ke Booking
-                                Intent intent = new Intent(getContext(), DetailsActivity.class);
-                                intent.putExtra("movieId", movie.getId());
-                                intent.putExtra("title", movie.getTitle());
-                                startActivity(intent);
-                            }
-                    );
-
-                    rvMovies.setAdapter(adapter);
+                    setupMovieGrid(movieList, isLoggedIn);
+                } else {
+                    Log.w("MovieFragment", "No movies found or empty response");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Movie>> call, Throwable t) {
                 t.printStackTrace();
+                Log.e("MovieFragment", "API call failed: " + t.getMessage());
             }
         });
     }
 
-    // 🔹 Check login dari SharedPreferences
-    private boolean isUserLoggedIn() {
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences("user_session", Context.MODE_PRIVATE);
-        return prefs.getBoolean("isLoggedIn", false);
+    private void setupMovieGrid(List<Movie> movies, boolean isLoggedIn) {
+        MovieAdapter adapter = new MovieAdapter(
+                getContext(),
+                movies,
+                isLoggedIn,
+                R.layout.item_movie,
+                R.id.imgPoster,
+                R.id.tvTitle,
+                R.id.btnBookNow,
+                movie -> {
+                    if (!isLoggedIn) {
+                        showLoginDialog();
+                        return;
+                    }
+
+                    // ✅ Pass moviecode key correctly to DetailsActivity
+                    Intent intent = new Intent(getContext(), DetailsActivity.class);
+                    intent.putExtra("moviecode", movie.getId()); // must match DetailsActivity
+                    intent.putExtra("title", movie.getTitle());
+                    intent.putExtra("poster", movie.getImagePoster()); // optional if you want to display poster directly
+                    startActivity(intent);
+                }
+        );
+
+        rvMovies.setAdapter(adapter);
     }
 
-    // 🔹 Pop-up suruh login dulu
+    // Check if user is logged in
+    private boolean isUserLoggedIn() {
+        SharedPrefManager spm = SharedPrefManager.getInstance(requireContext());
+        return spm.isLoggedIn();
+    }
+
+    // Show login dialog if user not logged in
     private void showLoginDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Login Required")

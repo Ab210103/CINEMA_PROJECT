@@ -20,6 +20,8 @@ import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 import com.example.cinema_project.sharedpref.SharedPrefManager;
 
+import java.util.UUID;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,7 +58,7 @@ public class SignUpActivity extends AppCompatActivity {
         btnSignUp = findViewById(R.id.btnSignUp);
 
         // Spinner setup
-        String[] professions = {"student", "other"};
+        String[] professions = {"Student", "Other"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.spinner_item_white,
@@ -76,16 +78,22 @@ public class SignUpActivity extends AppCompatActivity {
         String email = edtEmail.getText().toString().trim();
         String phone = edtPhone.getText().toString().trim();
         String password = edtPassword.getText().toString().trim();
-        String profession = spinnerProfession.getSelectedItem().toString().trim().toLowerCase();
+        String profession = spinnerProfession.getSelectedItem().toString();
 
-        // Gender check
+        // Gender mapping example
+        String gender = "";
         int selectedId = rgGender.getCheckedRadioButtonId();
-        if (selectedId == -1) {
-            Toast.makeText(this, "Please select gender!", Toast.LENGTH_SHORT).show();
-            return;
+        if (selectedId == R.id.rbMale) {
+            gender = "Male";
+        } else if (selectedId == R.id.rbFemale) {
+            gender = "Female";
         }
-        RadioButton selectedGender = findViewById(selectedId);
-        String gender = selectedGender.getText().toString().trim().toLowerCase();
+
+        if (profession.equalsIgnoreCase("Student")) {
+            profession = "Student";
+        } else {
+            profession = "Other";
+        }
 
         // Field validation
         if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
@@ -105,17 +113,22 @@ public class SignUpActivity extends AppCompatActivity {
 
         btnSignUp.setEnabled(false);
 
-        // Debug log
-        Log.d("REGISTER_DATA", email + ", " + username + ", " + phone + ", " + gender + ", " + profession);
+        String token = UUID.randomUUID().toString();
 
+        // Debug log
+        Log.d("REGISTER_DATA", email + ", " + username + ", " + gender + ", " + profession + ", " + phone + ", " + token);
+
+        String tetoken = "1cd4b43d-e4e1-4920-9805-cc3f6826d969";
         // API call
         Call<Customer> call = custService.signUp(
+                tetoken,
                 email,
                 username,
                 password,
-                phone,
                 gender,
-                profession
+                profession,
+                phone,
+                token
         );
 
         call.enqueue(new Callback<Customer>() {

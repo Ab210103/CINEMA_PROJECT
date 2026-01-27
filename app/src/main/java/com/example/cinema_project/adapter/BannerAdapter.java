@@ -10,22 +10,23 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.cinema_project.R;
+import com.example.cinema_project.model.Movie;
 
 import java.util.List;
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
 
-    private Context context;
-    private List<Integer> bannerList; // drawable resource IDs
-    private BannerClickListener listener;
-
     public interface BannerClickListener {
-        void onMoreInfoClick(int position);
-        void onBookNowClick(int position);
+        void onBookNowClick(Movie movie);
     }
 
-    public BannerAdapter(Context context, List<Integer> bannerList, BannerClickListener listener) {
+    private Context context;
+    private List<Movie> bannerList;
+    private BannerClickListener listener;
+
+    public BannerAdapter(Context context, List<Movie> bannerList, BannerClickListener listener) {
         this.context = context;
         this.bannerList = bannerList;
         this.listener = listener;
@@ -40,9 +41,23 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerView
 
     @Override
     public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
-        holder.imgBanner.setImageResource(bannerList.get(position));
-        holder.btnBookNow.setOnClickListener(v -> listener.onBookNowClick(position));
+        Movie movie = bannerList.get(position);
+
+        if (movie.getImageBanner() != null && !movie.getImageBanner().isEmpty()) {
+            Glide.with(context)
+                    .load(movie.getImageBanner())  // pakai getter getImageBanner()
+                    .centerCrop()
+                    .into(holder.imgBanner);
+        } else {
+            holder.imgBanner.setImageResource(R.drawable.ic_launcher_background);
+        }
+
+        holder.btnBookNow.setOnClickListener(v -> {
+            if (listener != null) listener.onBookNowClick(movie);
+        });
     }
+
+
 
     @Override
     public int getItemCount() {

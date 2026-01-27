@@ -62,46 +62,32 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         Movie movie = movieList.get(position);
 
+        // Set title
         holder.tvTitle.setText(movie.getTitle());
 
-        // Load imagePoster (byte[] or fallback drawable)
-        if (movie.getImagePoster() != null) {
+        // Load poster
+        if (movie.getImagePoster() != null && !movie.getImagePoster().isEmpty()) {
             Glide.with(context)
-                    .asBitmap()
-                    .load(movie.getImagePoster())
+                    .load(movie.getImagePoster())   // pakai getter getImagePoster()
                     .centerCrop()
                     .into(holder.imgMovie);
         } else {
-            Glide.with(context)
-                    .load(R.drawable.ic_launcher_background)
-                    .centerCrop()
-                    .into(holder.imgMovie);
+            holder.imgMovie.setImageResource(R.drawable.ic_launcher_background);
         }
 
-        // Show/hide Book Now button
+        // Hide book button jika view-only
         if (holder.btnBookNow != null)
             holder.btnBookNow.setVisibility(showBookNowButton ? View.VISIBLE : View.GONE);
 
-        // Click listeners
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onClick(movie);
-        });
-
-        holder.imgMovie.setOnClickListener(v -> {
-            if (listener != null) listener.onClick(movie);
-        });
-
-        if (holder.btnBookNow != null)
-            holder.btnBookNow.setOnClickListener(v -> {
-                if (listener != null) listener.onClick(movie);
-            });
-
-        // Long press for context menu
-        holder.itemView.setOnLongClickListener(v -> {
-            selectedPosition = holder.getAdapterPosition();
-            return false; // return false supaya context menu muncul
-        });
+        // Click listener hanya jika listener ada
+        if (listener != null) {
+            holder.itemView.setOnClickListener(v -> listener.onClick(movie));
+            if (holder.btnBookNow != null)
+                holder.btnBookNow.setOnClickListener(v -> listener.onClick(movie));
+        }
     }
+
+
 
     @Override
     public int getItemCount() {

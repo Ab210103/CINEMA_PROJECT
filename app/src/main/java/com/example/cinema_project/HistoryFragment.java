@@ -1,29 +1,29 @@
 package com.example.cinema_project;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.cinema_project.adapter.BookingAdapter;
 import com.example.cinema_project.model.Booking;
-import com.example.cinema_project.adapter.HistoryAdapter;
-import com.example.cinema_project.model.History;
+import com.example.cinema_project.model.Movie;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.BookingService;
+import com.example.cinema_project.remote.MovieService;
+import com.example.cinema_project.sharedpref.SharedPrefManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,139 +32,117 @@ import retrofit2.Response;
 public class HistoryFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private HistoryAdapter historyAdapter;
+    private BookingAdapter bookingAdapter;
     private BookingService bookingService;
-
-    private static final String API_KEY = "YOUR_API_KEY";
-
-    // Session
-    private boolean isLoggedIn = false;
-    private int userId = -1;
+    private MovieService movieService;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getActivity() != null) {
-            EdgeToEdge.enable(getActivity());
-        }
-    }
-
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_history, container, false);
     }
 
     @Override
-    public void onViewCreated(
-            @NonNull View view,
-            @Nullable Bundle savedInstanceState) {
-
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         recyclerView = view.findViewById(R.id.historyrecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Init service using YOUR ApiUtils
         bookingService = ApiUtils.getBookingService();
+        movieService = ApiUtils.getMovieService();
 
-        // Load session
-        loadSession();
+        SharedPrefManager spm = SharedPrefManager.getInstance(requireContext());
 
-        // 🔐 Check login
-        if (!isLoggedIn || userId == -1) {
+        if (!spm.isLoggedIn()) {
             Toast.makeText(getContext(),
                     "Please login to view booking history",
                     Toast.LENGTH_LONG).show();
-
-            recyclerView.setVisibility(View.GONE);
             return;
         }
 
-        // Load booking history for this user
-        loadBookingHistoryByUser();
+        loadBookingHistory(spm.getUser().getId(), spm.getToken());
     }
 
-    // LOAD LOGIN SESSION
-    private void loadSession() {
-        SharedPreferences prefs = requireActivity()
-                .getSharedPreferences("UserSession", Context.MODE_PRIVATE);
+    private void loadBookingHistory(int userId, String apiKey) {
 
-        isLoggedIn = prefs.getBoolean("isLoggedIn", false);
-        userId = prefs.getInt("userId", -1);
-
-        Log.d("HistoryFragment",
-                "Login=" + isLoggedIn + ", userId=" + userId);
-    }
-
-    // LOAD BOOKING HISTORY (FILTER BY USER)
-    private void loadBookingHistoryByUser() {
-
-        Call<List<Booking>> call =
-                bookingService.getAllBooking(API_KEY);
-
-        call.enqueue(new Callback<List<Booking>>() {
+        bookingService.getAllBooking(apiKey).enqueue(new Callback<List<Booking>>() {
             @Override
-            public void onResponse(
-                    @NonNull Call<List<Booking>> call,
-                    @NonNull Response<List<Booking>> response) {
-
+            public void onResponse(@NonNull Call<List<Booking>> call,
+                                   @NonNull Response<List<Booking>> response) {
                 if (!isAdded()) return;
 
                 if (response.isSuccessful() && response.body() != null) {
 
-                    List<History> historyList = new ArrayList<>();
+                    List<Booking> userBookings = new ArrayList<>();
+                    Map<Integer, Movie> movieMap = new HashMap<>();
 
-                    for (Booking b : response.body()) {
-
-                        // 🔥 FILTER BY LOGGED IN USER
-                        if (b.getUserid() == userId) {
-
-                            History history = new History(
-                                    b.getBId(),
-                                    "Movie Code: " + b.getMcode(),
-                                    b.getDate(),
-                                    b.getTime()
-                            );
-
-                            historyList.add(history);
+                    // Filter bookings for the current user
+                    for (Booking booking : response.body()) {
+                        if (booking.getUserid() == userId) {
+                            userBookings.add(booking);
                         }
                     }
 
-                    if (historyList.isEmpty()) {
-                        Toast.makeText(getContext(),
-                                "No booking history found",
-                                Toast.LENGTH_SHORT).show();
+                    if (userBookings.isEmpty()) {
+                        Toast.makeText(getContext(), "No booking history found", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    historyAdapter = new HistoryAdapter(historyList);
-                    recyclerView.setAdapter(historyAdapter);
+                    // Get unique movie codes
+                    List<Integer> uniqueMovieCodes = new ArrayList<>();
+                    for (Booking booking : userBookings) {
+                        if (!uniqueMovieCodes.contains(booking.getMcode())) {
+                            uniqueMovieCodes.add(booking.getMcode());
+                        }
+                    }
+
+                    // Track how many movies fetched
+                    int totalMovies = uniqueMovieCodes.size();
+                    int[] fetchedCount = {0};
+
+                    // Fetch each movie detail
+                    for (int code : uniqueMovieCodes) {
+                        movieService.getMovie(apiKey, code).enqueue(new Callback<Movie>() {
+                            @Override
+                            public void onResponse(Call<Movie> call, Response<Movie> movieResponse) {
+                                if (movieResponse.isSuccessful() && movieResponse.body() != null) {
+                                    movieMap.put(code, movieResponse.body());
+                                } else {
+                                    movieMap.put(code, null); // fallback
+                                }
+
+                                fetchedCount[0]++;
+                                if (fetchedCount[0] == totalMovies) {
+                                    // All movies fetched, set adapter
+                                    bookingAdapter = new BookingAdapter(userBookings, movieMap);
+                                    recyclerView.setAdapter(bookingAdapter);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Movie> call, Throwable t) {
+                                movieMap.put(code, null);
+                                fetchedCount[0]++;
+                                if (fetchedCount[0] == totalMovies) {
+                                    bookingAdapter = new BookingAdapter(userBookings, movieMap);
+                                    recyclerView.setAdapter(bookingAdapter);
+                                }
+                            }
+                        });
+                    }
 
                 } else {
-                    Toast.makeText(getContext(),
-                            "Failed to load booking history",
-                            Toast.LENGTH_SHORT).show();
-
-                    Log.e("HistoryFragment",
-                            "Response error: " + response.code());
+                    Toast.makeText(getContext(), "Failed to load booking history", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(
-                    @NonNull Call<List<Booking>> call,
-                    @NonNull Throwable t) {
-
+            public void onFailure(@NonNull Call<List<Booking>> call, @NonNull Throwable t) {
                 if (!isAdded()) return;
-
-                Toast.makeText(getContext(),
-                        "Error: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
-
-                Log.e("HistoryFragment", "API Error", t);
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

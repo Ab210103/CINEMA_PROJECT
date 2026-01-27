@@ -7,7 +7,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import com.example.cinema_project.sharedpref.SharedPrefManager;
 
@@ -16,6 +15,11 @@ public class ReceiptActivity extends AppCompatActivity {
     private TextView txtCustomer, txtMovie, txtDate, txtTime,
             txtQty, txtSeat, txtPayment, txtPrice;
     private Button btnDone, btnPrint;
+
+    // Booking data passed from DetailsActivity
+    private String customerName, movieTitle, date, time, seat, paymentType;
+    private int quantity, movieCode;
+    private double totalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,45 +39,40 @@ public class ReceiptActivity extends AppCompatActivity {
         btnDone = findViewById(R.id.btnDone);
         btnPrint = findViewById(R.id.btnPrint);
 
-        // Get intent data from DetailsActivity
-        String movieTitle = getIntent().getStringExtra("title");
-        String seats = getIntent().getStringExtra("seats");
-        String date = getIntent().getStringExtra("date");
-        String time = getIntent().getStringExtra("time");
-        int ticketQty = getIntent().getIntExtra("ticketQty", 1);
-        double totalPrice = getIntent().getDoubleExtra("totalPrice", 0);
-        String paymentType = getIntent().getStringExtra("paymentType");
+        // Get username for customer
+        SharedPrefManager spm = SharedPrefManager.getInstance(this);
+        customerName = spm.isLoggedIn() ? spm.getUser().getUsername() : "Guest";
 
-        // Fetch logged-in customer name
-        SharedPrefManager spm = new SharedPrefManager(this);
-        String customerName = "Guest"; // default
-        if (spm.isLoggedIn()) {
-            customerName = spm.getUser().getUsername();
-        }
-        txtCustomer.setText(customerName);
+        // Get data from Intent
+        Intent intent = getIntent();
+        movieTitle = intent.getStringExtra("MovieTitle");
+        date = intent.getStringExtra("BookingDate");
+        time = intent.getStringExtra("BookingTime");
+        quantity = intent.getIntExtra("TicketQuantity", 1);
+        seat = intent.getStringExtra("Seat");
+        paymentType = intent.getStringExtra("PaymentType");
+        totalPrice = intent.getDoubleExtra("TotalPrice", 0.0);
+        movieCode = intent.getIntExtra("MovieCode", -1);
 
-
-        // Set values to views
+        // Set TextViews
         txtCustomer.setText(customerName);
         txtMovie.setText(movieTitle);
         txtDate.setText(date);
         txtTime.setText(time);
-        txtQty.setText(String.valueOf(ticketQty));
-        txtSeat.setText(seats);
+        txtQty.setText(String.valueOf(quantity));
+        txtSeat.setText(seat);
         txtPayment.setText(paymentType);
         txtPrice.setText("RM " + String.format("%.2f", totalPrice));
 
-        // Button actions
-        btnDone.setOnClickListener(v -> {
-            // Go back to MenuActivity
-            Intent intent = new Intent(ReceiptActivity.this, MenuActivity.class);
-            // Clear back stack so user can't go back to DetailsActivity
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
-
+        // Print button (optional)
         btnPrint.setOnClickListener(v ->
-                Toast.makeText(ReceiptActivity.this,
-                        "Printing receipt...", Toast.LENGTH_SHORT).show());
+                Toast.makeText(ReceiptActivity.this, "Printing receipt...", Toast.LENGTH_SHORT).show());
+
+        // Done button: close ReceiptActivity and go to MenuActivity
+        btnDone.setOnClickListener(v -> {
+            Intent intentMenu = new Intent(ReceiptActivity.this, MenuActivity.class);
+            intentMenu.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intentMenu);
+        });
     }
 }

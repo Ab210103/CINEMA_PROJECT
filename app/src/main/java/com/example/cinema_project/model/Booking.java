@@ -1,76 +1,86 @@
 package com.example.cinema_project.model;
 
 public class Booking {
-    private int Bid;
-    private String date;
-    private String time;
-    private int quantity;
-    private String typepayment;
-    private double total;
-    private int userid;
-    private int mcode;
+    private int BookingID;
+    private String BookingDate;
+    private String BookingTime;
+    private int TicketQuantity;
+    private String seat;
+    private String PaymentType;
+    private double TotalPrice;
+    private int user_id;
+    private int movie_code;
+
+
+    public String getSeat() {
+        return seat;
+    }
+
+    public void setSeat(String seat) {
+        this.seat = seat;
+    }
 
     public int getMcode() {
-        return mcode;
+        return movie_code;
     }
 
     public void setMcode(int mcode) {
-        this.mcode = mcode;
+        this.movie_code = mcode;
     }
 
     public void setBId(int id) {
-        this.Bid = id;
+        this.BookingID = id;
     }
 
     public int getBId() {
-        return Bid;
+        return BookingID;
     }
 
     public void setDate(String date) {
-        this.date = date;
+        this.BookingDate = date;
     }
 
     public String getDate() {
-        return date;
+        return BookingDate;
     }
 
     public void setTime(String time) {
-        this.time = time;
+        this.BookingTime = time;
     }
 
     public String getTime() {
-        return time;
+        return BookingTime;
     }
 
     public int getQuantity() {
-        return quantity;
+        return TicketQuantity;
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.TicketQuantity = quantity;
     }
 
     public String getTypepayment() {
-        return typepayment;
+        return PaymentType;
     }
 
     public void setTypepayment(String typepayment) {
-        this.typepayment = typepayment;
+        this.PaymentType = typepayment;
     }
 
     public double getTotal() {
-        return total;
+        return TotalPrice;
     }
 
     public void setTotal(double total) {
-        this.total = total;
+        this.TotalPrice = total;
     }
 
     public void setUserid(int userid) {
-        this.userid = userid;
+        this.user_id = userid;
     }
 
     public int getUserid() {
-        return userid;
+        return user_id;
     }
 }

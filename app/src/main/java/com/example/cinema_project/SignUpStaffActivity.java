@@ -15,6 +15,8 @@ import com.example.cinema_project.model.Customer;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 
+import java.util.UUID;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,6 +25,7 @@ public class SignUpStaffActivity extends AppCompatActivity {
 
     private EditText edtName, edtEmail, edtPassword, edtPhone;
     private RadioGroup rgGender;
+    private RadioButton rbMale , rbFemale;
     private Button btnSignUp;
 
     private CustService custService;
@@ -73,28 +76,31 @@ public class SignUpStaffActivity extends AppCompatActivity {
             return;
         }
 
-        // Gender check
+        // Gender mapping example
+        String gender = "";
         int selectedId = rgGender.getCheckedRadioButtonId();
-        if (selectedId == -1) {
-            Toast.makeText(this, "Please select gender!", Toast.LENGTH_SHORT).show();
-            return;
+        if (selectedId == R.id.rbMale) {
+            gender = "Male";
+        } else if (selectedId == R.id.rbFemale) {
+            gender = "Female";
         }
 
-        RadioButton selectedGender = findViewById(selectedId);
-        String gender = selectedGender.getText().toString().trim().toLowerCase();
-
-        String profession = "staff"; // hardcoded
+        String profession = "staff";
 
         btnSignUp.setEnabled(false);
+        String token = UUID.randomUUID().toString();
 
+        String tetoken = "1cd4b43d-e4e1-4920-9805-cc3f6826d969";
         // API call
         Call<Customer> call = custService.signUp(
+                tetoken,
                 email,
                 username,
                 password,
-                phone,
                 gender,
-                profession
+                profession,
+                phone,
+                token
         );
 
         call.enqueue(new Callback<Customer>() {

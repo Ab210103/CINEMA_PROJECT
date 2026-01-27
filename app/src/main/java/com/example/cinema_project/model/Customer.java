@@ -2,7 +2,7 @@ package com.example.cinema_project.model;
 
 public class Customer {
     private int id;
-    private String email, username, password, token, role, gender, profession, phoneNumber;
+    private String email, username, password, token, role, gender, profession, phone,lease;
 
     public Customer() { }
 
@@ -14,7 +14,7 @@ public class Customer {
         this.password = password;
         this.gender = gender;
         this.profession = profession;
-        this.phoneNumber = phoneNumber;
+        this.phone = phoneNumber;
     }
 
     public int getId() { return id; }
@@ -41,6 +41,6 @@ public class Customer {
     public String getProfession() { return profession; }
     public void setProfession(String profession) { this.profession = profession; }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public String getPhoneNumber() { return phone; }
+    public void setPhoneNumber(String phoneNumber) { this.phone = phoneNumber; }
 }

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,7 +26,7 @@ public class StaffEditProfileActivity extends AppCompatActivity {
 
     // form fields
     private EditText etNames, etPhones, etEmails, etPasswords;
-
+    private Button updateprofiles;
     private Customer customer; // current logged-in staff
     private SharedPrefManager spm;
 
@@ -43,6 +44,7 @@ public class StaffEditProfileActivity extends AppCompatActivity {
         etPhones = findViewById(R.id.etphonesnums);
         etEmails = findViewById(R.id.etemails);
         etPasswords = findViewById(R.id.etpasswords);
+        updateprofiles = findViewById(R.id.btnstaffedit);
 
         // SharedPref
         spm = new SharedPrefManager(getApplicationContext());
@@ -57,12 +59,14 @@ public class StaffEditProfileActivity extends AppCompatActivity {
             etEmails.setText(customer.getEmail());
             etPasswords.setText(customer.getPassword());
         }
+
+        updateprofiles.setOnClickListener(v -> updateProfiles(v));
     }
 
     /**
      * Called when Update Profile button clicked
      */
-    public void updateProfile(View view) {
+    public void updateProfiles(View view) {
 
         String name = etNames.getText().toString().trim();
         String phone = etPhones.getText().toString().trim();
@@ -89,12 +93,12 @@ public class StaffEditProfileActivity extends AppCompatActivity {
         Call<Customer> call = custService.updateUser(
                 spm.getToken(),
                 customer.getId(),
-                customer.getUsername(),
                 customer.getEmail(),
-                customer.getPhoneNumber(),
+                customer.getUsername(),
                 customer.getPassword(),
                 customer.getGender(),
-                customer.getProfession()
+                customer.getProfession(),
+                customer.getPhoneNumber()
         );
 
         call.enqueue(new Callback<Customer>() {

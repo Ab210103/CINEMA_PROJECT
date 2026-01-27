@@ -1,14 +1,13 @@
 package com.example.cinema_project;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -18,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.cinema_project.model.FileInfo;
 import com.example.cinema_project.model.Movie;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.MovieService;
@@ -26,6 +26,9 @@ import com.example.cinema_project.sharedpref.SharedPrefManager;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,7 +42,10 @@ public class UpdateMovieActivity extends AppCompatActivity {
     private ImageView imgBanner, imgPoster;
     private Button btnUploadBanner, btnUploadPoster, btnUpdateMovie;
 
-    private String bannerString, posterString;
+    private Uri bannerUri = null;
+    private Uri posterUri = null;
+
+    private String bannerFileName, posterFileName;
     private Movie movie;
 
     @Override
@@ -49,7 +55,10 @@ public class UpdateMovieActivity extends AppCompatActivity {
 
         // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarUpdateMovie);
-        toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> {
+            startActivity(new Intent(UpdateMovieActivity.this, StaffHomeActivity.class));
+            finish();
+        });
 
         // Views
         etTitle = findViewById(R.id.etMovieTitle);
@@ -62,96 +71,69 @@ public class UpdateMovieActivity extends AppCompatActivity {
         btnUploadPoster = findViewById(R.id.btnUploadPoster);
         btnUpdateMovie = findViewById(R.id.btnUpdateMovie);
 
-        // Image pickers
+        // Pick images
         btnUploadBanner.setOnClickListener(v -> pickImage(PICK_BANNER));
         btnUploadPoster.setOnClickListener(v -> pickImage(PICK_POSTER));
 
-        // Load movie ID from intent
+        // Load movie
         int movieId = getIntent().getIntExtra("movie_id", -1);
-        if (movieId != -1) {
-            loadMovie(movieId);
-        }
+        if (movieId != -1) loadMovie(movieId);
 
-        // Update movie button
-        btnUpdateMovie.setOnClickListener(v -> updateMovie());
+        // Update button
+        btnUpdateMovie.setOnClickListener(v -> {
+            if (bannerUri != null) {
+                uploadFile(bannerUri, true);
+            } else if (posterUri != null) {
+                uploadFile(posterUri, false);
+            } else {
+                updateMovieRecord();
+            }
+        });
     }
 
     private void pickImage(int requestCode) {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("image/*");
         startActivityForResult(intent, requestCode);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri imageUri = data.getData();
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(imageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-                // Convert bitmap to Base64 string
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
-                byte[] bytes = baos.toByteArray();
-                String encoded = Base64.encodeToString(bytes, Base64.DEFAULT);
-
-                if (requestCode == PICK_BANNER) {
-                    bannerString = encoded;
-                    imgBanner.setImageBitmap(bitmap);
-                } else if (requestCode == PICK_POSTER) {
-                    posterString = encoded;
-                    imgPoster.setImageBitmap(bitmap);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+        if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            if (requestCode == PICK_BANNER) {
+                bannerUri = uri;
+                imgBanner.setImageURI(uri);
+            } else if (requestCode == PICK_POSTER) {
+                posterUri = uri;
+                imgPoster.setImageURI(uri);
             }
         }
     }
 
     private void loadMovie(int movieId) {
-        SharedPrefManager spm = new SharedPrefManager(this);
-        String apiKey = spm.getToken();
-
+        String token = SharedPrefManager.getInstance(this).getUser().getToken();
         MovieService movieService = ApiUtils.getMovieService();
-        movieService.getMovie(apiKey, movieId).enqueue(new Callback<Movie>() {
+        movieService.getMovie(token, movieId).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     movie = response.body();
-
                     etTitle.setText(movie.getTitle());
                     etDesc.setText(movie.getDescription());
                     etGenre.setText(movie.getGenre());
-                    etLength.setText(movie.getLength());
-
-                    bannerString = movie.getImageBanner();
-                    posterString = movie.getImagePoster();
-
-                    // Decode and display images
-                    if (bannerString != null) {
-                        byte[] bannerBytes = Base64.decode(bannerString, Base64.DEFAULT);
-                        imgBanner.setImageBitmap(BitmapFactory.decodeByteArray(bannerBytes, 0, bannerBytes.length));
-                    }
-                    if (posterString != null) {
-                        byte[] posterBytes = Base64.decode(posterString, Base64.DEFAULT);
-                        imgPoster.setImageBitmap(BitmapFactory.decodeByteArray(posterBytes, 0, posterBytes.length));
-                    }
-
+                    etLength.setText(String.valueOf(movie.getLength()));
+                    bannerFileName = movie.getImageBanner();
+                    posterFileName = movie.getImagePoster();
                 } else if (response.code() == 401) {
-                    Toast.makeText(UpdateMovieActivity.this, "Invalid session. Please login again", Toast.LENGTH_LONG).show();
-                    spm.logout();
+                    Toast.makeText(UpdateMovieActivity.this, "Session expired", Toast.LENGTH_SHORT).show();
+                    SharedPrefManager.getInstance(UpdateMovieActivity.this).logout();
                     startActivity(new Intent(UpdateMovieActivity.this, LoginActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(UpdateMovieActivity.this, "Error loading movie: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UpdateMovieActivity.this, "Error loading movie", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<Movie> call, Throwable t) {
                 Toast.makeText(UpdateMovieActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -159,54 +141,74 @@ public class UpdateMovieActivity extends AppCompatActivity {
         });
     }
 
-    private void updateMovie() {
+    private void uploadFile(Uri fileUri, boolean isBanner) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(fileUri);
+            byte[] bytes = getBytesFromInputStream(inputStream);
+            MultipartBody.Part body = MultipartBody.Part.createFormData(
+                    "file", getFileName(fileUri),
+                    RequestBody.create(MediaType.parse(getContentResolver().getType(fileUri)), bytes)
+            );
+
+            String token = SharedPrefManager.getInstance(this).getUser().getToken();
+            ApiUtils.getMovieService().uploadFile(token, body).enqueue(new Callback<FileInfo>() {
+                @Override
+                public void onResponse(Call<FileInfo> call, Response<FileInfo> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        if (isBanner) {
+                            bannerFileName = response.body().getFile();
+                            if (posterUri != null) uploadFile(posterUri, false);
+                            else updateMovieRecord();
+                        } else {
+                            posterFileName = response.body().getFile();
+                            updateMovieRecord();
+                        }
+                    } else {
+                        Toast.makeText(UpdateMovieActivity.this, "File upload failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<FileInfo> call, Throwable t) {
+                    Toast.makeText(UpdateMovieActivity.this, "Upload error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error preparing file", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateMovieRecord() {
         if (movie == null) return;
 
         String title = etTitle.getText().toString().trim();
         String desc = etDesc.getText().toString().trim();
         String genre = etGenre.getText().toString().trim();
-        String lengthStr = etLength.getText().toString().trim();
-
-        if (title.isEmpty() || desc.isEmpty() || genre.isEmpty() || lengthStr.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         int length;
         try {
-            length = Integer.parseInt(lengthStr);
+            length = Integer.parseInt(etLength.getText().toString().trim());
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Length must be a number", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        SharedPrefManager spm = new SharedPrefManager(this);
-        String apiKey = spm.getToken();
-
-        MovieService movieService = ApiUtils.getMovieService();
-        Call<Movie> call = movieService.updateMovie(
-                apiKey,
-                movie.getId(),
-                title,
-                desc,
-                length,
-                genre,
-                bannerString,
-                posterString
-        );
-
-        call.enqueue(new Callback<Movie>() {
+        String token = SharedPrefManager.getInstance(this).getUser().getToken();
+        ApiUtils.getMovieService().updateMovie(
+                token, movie.getId(), title, desc, length, genre, bannerFileName, posterFileName
+        ).enqueue(new Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    showAlert("Movie updated successfully!");
+                if (response.isSuccessful()) {
+                    Toast.makeText(UpdateMovieActivity.this, "Movie updated successfully", Toast.LENGTH_LONG).show();
+                    finish();
                 } else if (response.code() == 401) {
-                    Toast.makeText(UpdateMovieActivity.this, "Invalid session. Please login again", Toast.LENGTH_LONG).show();
-                    spm.logout();
+                    Toast.makeText(UpdateMovieActivity.this, "Session expired", Toast.LENGTH_SHORT).show();
+                    SharedPrefManager.getInstance(UpdateMovieActivity.this).logout();
                     startActivity(new Intent(UpdateMovieActivity.this, LoginActivity.class));
                     finish();
                 } else {
-                    Toast.makeText(UpdateMovieActivity.this, "Error updating movie: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UpdateMovieActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -217,11 +219,35 @@ public class UpdateMovieActivity extends AppCompatActivity {
         });
     }
 
-    private void showAlert(String message) {
-        new AlertDialog.Builder(this)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("OK", (dialog, which) -> finish())
-                .show();
+    private String getFileName(Uri uri) {
+        String result = null;
+        if ("content".equals(uri.getScheme())) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (idx != -1) result = cursor.getString(idx);
+                }
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) result = result.substring(cut + 1);
+        }
+        return result;
+    }
+
+    private byte[] getBytesFromInputStream(InputStream inputStream) throws Exception {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+        buffer.flush();
+        return buffer.toByteArray();
     }
 }

@@ -57,20 +57,13 @@
     </LinearLayout>
 
     <!-- Horizontal Banner Section -->
-    <HorizontalScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBanner"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:id="@+id/llBannerContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:paddingEnd="8dp">
-            <!-- Banner items akan inflate dari adapter -->
-        </LinearLayout>
-    </HorizontalScrollView>
+        android:layout_height="180dp"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"/>
 
     <!-- Spacer -->
     <View

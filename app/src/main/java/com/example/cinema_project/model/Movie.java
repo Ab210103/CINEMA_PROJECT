@@ -2,62 +2,62 @@ package com.example.cinema_project.model;
 
 public class Movie {
 
-    private int code;                 // Primary Key
+    private int moviecode;                 // Primary Key
     private String title;           // Movie title
     private String description;     // Movie description / synopsis
-    private String length;          // Movie duration, e.g., "2h 30m"
+    private int length;          // Movie duration, e.g., "2h 30m"
     private String genre;           // Genre
-    private String imagePoster;     // Poster image from DB (BLOB)
-    private String imageBanner;     // Banner image from DB (BLOB)
-    private int staffID;            // Foreign Key to Staff
+    private String image;     // Poster image from DB (BLOB)
+    private String banner;     // Banner image from DB (BLOB)
+    private int user_id;            // Foreign Key to Staff
 
     // Constructor
-    public Movie(String title, String description, String length, String genre,
-                 String imagePoster, String imageBanner) {
+    public Movie(String title, String description, int length, String genre,
+                 String imagePoster, String imageBanner,int user_id) {
         this.title = title;
         this.description = description;
         this.length = length;
         this.genre = genre;
-        this.imagePoster = imagePoster;
-        this.imageBanner = imageBanner;
-        //this.staffID = staffID;
+        this.image = imagePoster;
+        this.banner = imageBanner;
+        this.user_id = user_id;
     }
     public Movie(){}
 
     // Getters
-    public int getId() { return code; }
+    public int getId() { return moviecode; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
-    public String getLength() { return length; }
+    public int getLength() { return length; }
     public String getGenre() { return genre; }
-    public String getImagePoster() { return imagePoster; }
-    public String getImageBanner() { return imageBanner; }
-    public int getStaffID() { return staffID; }
+    public String getImagePoster() { return image; }
+    public String getImageBanner() { return banner; }
+    public int getStaffID() { return user_id; }
 
     // Setters (optional, if you want to update fields)
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
-    public void setLength(String length) { this.length = length; }
+    public void setLength(int length) { this.length = length; }
     public void setGenre(String genre) { this.genre = genre; }
-    public void setImagePoster(String imagePoster) { this.imagePoster = imagePoster; }
-    public void setImageBanner(String imageBanner) { this.imageBanner = imageBanner; }
-    public void setStaffID(int staffID) { this.staffID = staffID; }
+    public void setImagePoster(String imagePoster) { this.image = imagePoster; }
+    public void setImageBanner(String imageBanner) { this.banner = imageBanner; }
+    public void setStaffID(int staffID) { this.user_id = staffID; }
 
     public void setCode(int code) {
-        this.code = code;
+        this.moviecode = code;
     }
 
     @Override
     public String toString() {
         return "Movie{" +
-                "moviecode=" + code +
+                "moviecode=" + moviecode +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", length='" + length + '\'' +
                 ", genre='" + genre + '\'' +
-                ", userid='" + staffID + '\'' +
-                ", banner='" + imageBanner + '\'' +
-                ", image='" + imagePoster + '\'' +
+                ", userid='" + user_id + '\'' +
+                ", banner='" + banner + '\'' +
+                ", image='" + image + '\'' +
                 '}';
     }
 

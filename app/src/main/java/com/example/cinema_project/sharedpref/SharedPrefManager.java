@@ -80,5 +80,8 @@ public class SharedPrefManager {
         SharedPreferences.Editor editor = sp.edit();
         editor.clear();
         editor.apply();
+
+        // 🔥 Reset singleton instance
+        mInstance = null;
     }
 }

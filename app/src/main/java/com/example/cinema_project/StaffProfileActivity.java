@@ -1,7 +1,6 @@
 package com.example.cinema_project;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.cinema_project.model.Customer;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
+import com.example.cinema_project.sharedpref.SharedPrefManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,10 +30,9 @@ public class StaffProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_profile);
 
-        // Toolbar setup
-        Toolbar toolbar = findViewById(R.id.toolbarMovieList);
+        Toolbar toolbar = findViewById(R.id.toolbarstaffProfile);
         toolbar.setTitle("STAFF PROFILE");
-        toolbar.setNavigationIcon(R.drawable.arrow_back); // your back arrow
+        toolbar.setNavigationIcon(R.drawable.arrow_back);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
@@ -49,63 +48,52 @@ public class StaffProfileActivity extends AppCompatActivity {
 
         custService = ApiUtils.getCustService();
 
-        // Fetch token from SharedPreferences
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String token = prefs.getString("token", null);
+        refreshProfile();
+    }
 
-        if (token != null) {
-            fetchStaffProfile(token);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshProfile();
+    }
+
+    private void refreshProfile() {
+        SharedPrefManager spm = SharedPrefManager.getInstance(this);
+
+        if (spm.isLoggedIn()) {
+            // User logged in
+            Customer user = spm.getUser();
+
+            tvName.setText(user.getUsername() != null ? user.getUsername() : "-");
+            tvEmail.setText(user.getEmail() != null ? user.getEmail() : "-");
+            tvPhone.setText(user.getPhoneNumber() != null ? user.getPhoneNumber() : "-");
+            tvGender.setText(user.getGender() != null ? user.getGender() : "-");
+            tvProfession.setText(user.getProfession() != null ? user.getProfession() : "-");
+
+            btnEdit.setVisibility(Button.VISIBLE);
+
+            btnEdit.setOnClickListener(v -> {
+                Intent intent = new Intent(StaffProfileActivity.this, StaffEditProfileActivity.class);
+                startActivity(intent);
+            });
+
+
         } else {
-            // fallback if not logged in
+            // Guest mode
             tvName.setText("Guest");
             tvEmail.setText("-");
             tvPhone.setText("-");
             tvGender.setText("-");
             tvProfession.setText("-");
+
+            btnEdit.setVisibility(Button.GONE);
         }
-
-        btnEdit.setOnClickListener(v -> {
-            Intent intent = new Intent(StaffProfileActivity.this, StaffEditProfileActivity.class);
-            startActivity(intent);
-        });
     }
 
-    private void fetchStaffProfile(String token) {
-        // Call API to get staff profile
-        Call<Customer> call = custService.getProfile("Bearer " + token);
-        call.enqueue(new Callback<Customer>() {
-            @Override
-            public void onResponse(@NonNull Call<Customer> call, @NonNull Response<Customer> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Customer staff = response.body();
-
-                    tvName.setText(staff.getUsername() != null ? staff.getUsername() : "-");
-                    tvEmail.setText(staff.getEmail() != null ? staff.getEmail() : "-");
-                    tvPhone.setText(staff.getPhoneNumber() != null ? staff.getPhoneNumber() : "-");
-                    tvGender.setText(staff.getGender() != null ? staff.getGender() : "-");
-                    tvProfession.setText(staff.getProfession() != null ? staff.getProfession() : "-");
-
-                } else {
-                    Toast.makeText(StaffProfileActivity.this,
-                            "Failed to load profile: " + response.code(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Customer> call, @NonNull Throwable t) {
-                Toast.makeText(StaffProfileActivity.this,
-                        "API Error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    // Toolbar back button pressed
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            Intent intent = new Intent(StaffProfileActivity.this, StaffHomeActivity.class);
+            Intent intent = new Intent(this, StaffHomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             return true;
