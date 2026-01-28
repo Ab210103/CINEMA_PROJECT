@@ -94,7 +94,7 @@ public class SignUpStaffActivity extends AppCompatActivity {
         // Hash the password with MD5 before sending
         String hashedPassword = md5(password);
 
-        String tetoken = "d9866f32-fb70-4656-97d3-39d314311803";
+        String tetoken = "4716791f-c555-4b63-a8e1-86a38925473e";
         Call<Customer> call = custService.signUp(
                 tetoken,
                 email,
