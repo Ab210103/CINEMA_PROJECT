@@ -30,7 +30,7 @@ public class StaffProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_profile);
 
-        Toolbar toolbar = findViewById(R.id.toolbarstaffProfile);
+        Toolbar toolbar = findViewById(R.id.toolbarStaffProfile);
         toolbar.setTitle("STAFF PROFILE");
         toolbar.setNavigationIcon(R.drawable.arrow_back);
         setSupportActionBar(toolbar);

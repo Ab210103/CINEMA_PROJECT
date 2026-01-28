@@ -78,7 +78,7 @@ public class UpdateMovieActivity extends AppCompatActivity {
         btnUploadPoster.setOnClickListener(v -> pickImage(PICK_POSTER));
 
         // Load movie ID from intent
-        int movieId = getIntent().getIntExtra("movie_id", -1);
+        int movieId = getIntent().getIntExtra("movieCode", -1);
         if (movieId != -1) loadMovie(movieId);
 
         // Update button

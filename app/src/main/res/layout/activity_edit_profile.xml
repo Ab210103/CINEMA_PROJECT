@@ -13,9 +13,19 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#1E1E1E"
-        app:title="EDIT PROFILE"
         app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/arrow_back" />
+        app:navigationIcon="@drawable/arrow_back">
+
+        <TextView
+            android:id="@+id/tvToolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="EDIT PROFILE"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.Toolbar>
 
     <!-- Card Form -->
     <androidx.cardview.widget.CardView
@@ -147,7 +157,9 @@
                     android:layout_weight="0.65"
                     android:inputType="textPassword"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="#FF5252"/>
+                    android:backgroundTint="#FF5252"
+                    android:hint="Optional"
+                    android:textColorHint="#6AFFFFFF"/>
             </LinearLayout>
 
             <!-- Add Movie Button -->

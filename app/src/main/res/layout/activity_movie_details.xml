@@ -8,14 +8,15 @@
     android:fitsSystemWindows="true">
 
     <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarMovieDetails"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#1E1E1E"
+        app:navigationIcon="@drawable/arrow_back"
         app:title="MOVIE DETAILS"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/arrow_back" />
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"/>
 
     <!-- Card -->
     <androidx.cardview.widget.CardView

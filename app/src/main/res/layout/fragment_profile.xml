@@ -7,6 +7,30 @@
     android:padding="16dp"
     android:fitsSystemWindows="true">
 
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarstaffProfile"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#1E1E1E"
+        app:titleTextColor="#FFFFFF">
+
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="STAFF PROFILE"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

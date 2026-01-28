@@ -10,14 +10,15 @@
     android:fitsSystemWindows="true">
 
     <!-- TOOLBAR (TOP) -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarstaffProfile"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarStaffProfile"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#1E1E1E"
+        app:navigationIcon="@drawable/arrow_back"
         app:title="STAFF PROFILE"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/arrow_back" />
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"/>
 
     <!-- WRAPPER TO CENTER CARD -->
     <LinearLayout

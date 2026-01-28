@@ -9,33 +9,16 @@
     android:fitsSystemWindows="true">
 
     <!-- TOP APP BAR / TOOLBAR -->
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarLogin"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#1E1E1E"
-        app:navigationIcon="@drawable/arrow_back">
+        app:navigationIcon="@drawable/arrow_back"
+        app:title="CINEMAX"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"/>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/toolbarTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="CINEMAX"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.appcompat.widget.Toolbar>
 
     <!-- LOGIN CARD -->
     <androidx.cardview.widget.CardView

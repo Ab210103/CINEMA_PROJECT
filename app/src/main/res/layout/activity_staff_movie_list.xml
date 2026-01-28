@@ -8,14 +8,16 @@
     android:fitsSystemWindows="true">
 
     <!-- TOP BAR / TOOLBAR -->
-    <androidx.appcompat.widget.Toolbar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarMovieList"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#1E1E1E"
+        app:navigationIcon="@drawable/arrow_back"
         app:title="MOVIE LIST"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/arrow_back" />
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"/>
+
 
     <!-- RecyclerView under Toolbar -->
     <androidx.recyclerview.widget.RecyclerView

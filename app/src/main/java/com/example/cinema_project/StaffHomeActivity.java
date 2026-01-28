@@ -18,7 +18,7 @@ public class StaffHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_staff_home);
 
-        Toolbar toolbar = findViewById(R.id.toolbarStaff);
+        Toolbar toolbar = findViewById(R.id.toolbarstaffhome);
         setSupportActionBar(toolbar);
 
         btnMovieList = findViewById(R.id.btnMovieList);

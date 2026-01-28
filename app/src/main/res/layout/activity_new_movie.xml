@@ -19,9 +19,19 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="#1E1E1E"
-            app:title="ADD NEW MOVIE"
             app:titleTextColor="#FFFFFF"
-            app:navigationIcon="@drawable/arrow_back" />
+            app:navigationIcon="@drawable/arrow_back">
+            <TextView
+                android:id="@+id/toolbarTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="ADD NEW MOVIE"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+        </androidx.appcompat.widget.Toolbar>
 
         <!-- Card Form -->
         <androidx.cardview.widget.CardView
