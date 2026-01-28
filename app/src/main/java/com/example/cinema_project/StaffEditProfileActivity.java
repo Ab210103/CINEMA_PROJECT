@@ -18,6 +18,10 @@ import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 import com.example.cinema_project.sharedpref.SharedPrefManager;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -72,6 +76,7 @@ public class StaffEditProfileActivity extends AppCompatActivity {
         String phone = etPhones.getText().toString().trim();
         String email = etEmails.getText().toString().trim();
         String password = etPasswords.getText().toString().trim();
+        String hashedPassword = md5(password);
 
         if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_LONG).show();
@@ -84,8 +89,10 @@ public class StaffEditProfileActivity extends AppCompatActivity {
         customer.setUsername(name);
         customer.setPhoneNumber(phone);
         customer.setEmail(email);
-        customer.setPassword(password);
 
+        if (!password.isEmpty()) {
+            customer.setPassword(hashedPassword); // only update if user typed new password
+        }
         Log.d("MyApp:", "New Profile: " + customer.toString());
 
         // API
@@ -136,6 +143,23 @@ public class StaffEditProfileActivity extends AppCompatActivity {
                 Log.e("MyApp:", t.toString());
             }
         });
+    }
+
+    public static String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashText = number.toString(16);
+
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
+            }
+            return hashText;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

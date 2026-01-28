@@ -23,9 +23,6 @@ public interface MovieService {
     @GET("Movies")
     Call<List<Movie>> getAllMovie(@Header("api-key") String api_key);
 
-    @GET("movies")
-    Call<List<Movie>> getAllMoviePublic();
-
     @GET("Movies/{moviecode}")
     Call<Movie> getMovie(@Header("api-key") String api_key, @Path("moviecode") int id);
 

@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -18,8 +17,10 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.cinema_project.model.Customer;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
-import com.example.cinema_project.sharedpref.SharedPrefManager;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -80,7 +81,7 @@ public class SignUpActivity extends AppCompatActivity {
         String password = edtPassword.getText().toString().trim();
         String profession = spinnerProfession.getSelectedItem().toString();
 
-        // Gender mapping example
+        // Gender mapping
         String gender = "";
         int selectedId = rgGender.getCheckedRadioButtonId();
         if (selectedId == R.id.rbMale) {
@@ -112,19 +113,21 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         btnSignUp.setEnabled(false);
-
         String token = UUID.randomUUID().toString();
 
-        // Debug log
-        Log.d("REGISTER_DATA", email + ", " + username + ", " + gender + ", " + profession + ", " + phone + ", " + token);
+        // Hash the password using MD5
+        String hashedPassword = md5(password);
 
-        String tetoken = "1cd4b43d-e4e1-4920-9805-cc3f6826d969";
-        // API call
+        // Debug log
+        Log.d("REGISTER_DATA", email + ", " + username + ", " + gender + ", " + profession + ", " + phone + ", hashedPwd: " + hashedPassword);
+
+        String tetoken = "d9866f32-fb70-4656-97d3-39d314311803";
+        // API call with MD5 password
         Call<Customer> call = custService.signUp(
                 tetoken,
                 email,
                 username,
-                password,
+                hashedPassword, // MD5 password
                 gender,
                 profession,
                 phone,
@@ -137,23 +140,11 @@ public class SignUpActivity extends AppCompatActivity {
                 btnSignUp.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Customer user = response.body();
-
-                    // Save user to SharedPref
-                    SharedPrefManager.getInstance(SignUpActivity.this).storeUser(user);
-
                     Toast.makeText(SignUpActivity.this,
-                            "Welcome " + user.getUsername() + "! Registration successful 🎉",
+                            "Customer registered successfully 👔",
                             Toast.LENGTH_SHORT).show();
 
-                    // Navigate based on role
-                    Intent intent;
-                    if ("staff".equalsIgnoreCase(user.getRole())) {
-                        intent = new Intent(SignUpActivity.this, StaffHomeActivity.class);
-                    } else {
-                        intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                    }
-
+                    Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
 
@@ -172,6 +163,24 @@ public class SignUpActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // MD5 hashing helper method
+    public static String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashText = number.toString(16);
+
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
+            }
+            return hashText;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

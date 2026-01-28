@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -15,6 +14,9 @@ import com.example.cinema_project.model.Customer;
 import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -25,7 +27,6 @@ public class SignUpStaffActivity extends AppCompatActivity {
 
     private EditText edtName, edtEmail, edtPassword, edtPhone;
     private RadioGroup rgGender;
-    private RadioButton rbMale , rbFemale;
     private Button btnSignUp;
 
     private CustService custService;
@@ -76,7 +77,7 @@ public class SignUpStaffActivity extends AppCompatActivity {
             return;
         }
 
-        // Gender mapping example
+        // Gender mapping
         String gender = "";
         int selectedId = rgGender.getCheckedRadioButtonId();
         if (selectedId == R.id.rbMale) {
@@ -90,13 +91,15 @@ public class SignUpStaffActivity extends AppCompatActivity {
         btnSignUp.setEnabled(false);
         String token = UUID.randomUUID().toString();
 
-        String tetoken = "1cd4b43d-e4e1-4920-9805-cc3f6826d969";
-        // API call
+        // Hash the password with MD5 before sending
+        String hashedPassword = md5(password);
+
+        String tetoken = "d9866f32-fb70-4656-97d3-39d314311803";
         Call<Customer> call = custService.signUp(
                 tetoken,
                 email,
                 username,
-                password,
+                hashedPassword, // <-- MD5 password
                 gender,
                 profession,
                 phone,
@@ -109,10 +112,8 @@ public class SignUpStaffActivity extends AppCompatActivity {
                 btnSignUp.setEnabled(true);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Customer staff = response.body();
-
                     Toast.makeText(SignUpStaffActivity.this,
-                            "Welcome " + staff.getUsername() + "! Staff registered successfully 👔",
+                            "! Staff registered successfully 👔",
                             Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(SignUpStaffActivity.this, LoginActivity.class);
@@ -134,5 +135,23 @@ public class SignUpStaffActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // MD5 helper method
+    public static String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashText = number.toString(16);
+
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
+            }
+            return hashText;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

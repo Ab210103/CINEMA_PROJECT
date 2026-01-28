@@ -12,7 +12,7 @@ import retrofit2.http.Path;
 public interface CustService {
     @FormUrlEncoded
     @POST("users/login")
-    Call<Customer> login(@Field("username") String name,
+    Call<Customer> login(@Field("username") String username,
                          @Field("password") String password);
 
     @FormUrlEncoded

@@ -16,6 +16,10 @@ import com.example.cinema_project.remote.ApiUtils;
 import com.example.cinema_project.remote.CustService;
 import com.example.cinema_project.sharedpref.SharedPrefManager;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,7 +63,7 @@ public class EditProfileActivity extends AppCompatActivity {
             etPhones.setText(customer.getPhoneNumber());
             etEmails.setText(customer.getEmail());
             // ❗ Jangan auto isi password lama (security)
-            etPasswords.setText("");
+            etPasswords.setText(customer.getPassword());
         }
 
         updateprofile.setOnClickListener(v -> updateProfile());
@@ -70,6 +74,7 @@ public class EditProfileActivity extends AppCompatActivity {
         String phone = etPhones.getText().toString().trim();
         String email = etEmails.getText().toString().trim();
         String password = etPasswords.getText().toString().trim();
+        String hashedPassword = md5(password);
 
         if (name.isEmpty() || phone.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_LONG).show();
@@ -82,10 +87,11 @@ public class EditProfileActivity extends AppCompatActivity {
         customer.setEmail(email);
 
         if (!password.isEmpty()) {
-            customer.setPassword(password); // only update if user typed new password
+            customer.setPassword(hashedPassword); // only update if user typed new password
         }
 
         CustService custService = ApiUtils.getCustService();
+
 
         Call<Customer> call = custService.updateUser(
                 spm.getToken(),
@@ -133,6 +139,22 @@ public class EditProfileActivity extends AppCompatActivity {
         });
     }
 
+    public static String md5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String hashText = number.toString(16);
+
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
+            }
+            return hashText;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private void showSuccessDialog(String msg) {
         new AlertDialog.Builder(this)
                 .setMessage(msg)

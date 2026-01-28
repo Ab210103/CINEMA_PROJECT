@@ -2,14 +2,9 @@ package com.example.cinema_project;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -38,36 +33,31 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Auto-redirect if already logged in
         if (SharedPrefManager.getInstance(this).isLoggedIn()) {
             startActivity(new Intent(this, MenuActivity.class));
             finish();
             return;
         }
 
-        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbarLogin);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true); // show back button
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-        // Bind views
-        edtLogin = findViewById(R.id.edtUsername);       // Name or Email
+        edtLogin = findViewById(R.id.edtUsername);
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
-        rgUserType = findViewById(R.id.rgUserType);   // RadioGroup for Customer/Staff
+        rgUserType = findViewById(R.id.rgUserType);
         rbCustomer = findViewById(R.id.rbCustomer);
         rbStaff = findViewById(R.id.rbStaff);
-        tvRegister = findViewById(R.id.textViewRegister);   // TextView "Register Here"
+        tvRegister = findViewById(R.id.textViewRegister);
 
         custService = ApiUtils.getCustService();
 
-        // Login button click
         btnLogin.setOnClickListener(v -> doLogin());
 
-        // Register TextView click
         tvRegister.setOnClickListener(v -> {
             if (rbCustomer.isChecked()) {
                 startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
@@ -79,11 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // Handle toolbar back button click
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            // Navigate to MenuActivity instead of finishing
             Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -91,7 +79,6 @@ public class LoginActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     private void doLogin() {
         String login = edtLogin.getText().toString().trim();
@@ -108,14 +95,28 @@ public class LoginActivity extends AppCompatActivity {
 
         if (Patterns.EMAIL_ADDRESS.matcher(login).matches()) {
             call = custService.loginEmail(login, password);
+            Log.d("LOGIN", "Logging in with email: " + login);
         } else {
             call = custService.login(login, password);
+            Log.d("LOGIN", "Logging in with username: " + login);
         }
 
         call.enqueue(new Callback<Customer>() {
             @Override
             public void onResponse(Call<Customer> call, Response<Customer> response) {
                 btnLogin.setEnabled(true);
+
+                Log.d("LOGIN", "Response code: " + response.code());
+
+                if (response.body() != null) {
+                    Log.d("LOGIN", "Response body: " + response.body().toString());
+                } else if (response.errorBody() != null) {
+                    try {
+                        Log.d("LOGIN", "Error body: " + response.errorBody().string());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 if (response.isSuccessful() && response.body() != null) {
                     Customer user = response.body();
@@ -134,7 +135,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
-
                 } else {
                     Toast.makeText(LoginActivity.this,
                             "Login failed. Invalid credentials.",
@@ -145,6 +145,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Customer> call, Throwable t) {
                 btnLogin.setEnabled(true);
+                Log.e("LOGIN", "Network error", t);
                 Toast.makeText(LoginActivity.this,
                         "Network error: " + t.getMessage(),
                         Toast.LENGTH_SHORT).show();
