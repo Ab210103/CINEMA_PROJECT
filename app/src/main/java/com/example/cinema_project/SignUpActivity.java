@@ -151,7 +151,7 @@ public class SignUpActivity extends AppCompatActivity {
                     if ("staff".equalsIgnoreCase(user.getRole())) {
                         intent = new Intent(SignUpActivity.this, StaffHomeActivity.class);
                     } else {
-                        intent = new Intent(SignUpActivity.this, MenuActivity.class);
+                        intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     }
 
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
