@@ -86,7 +86,7 @@ public class SignUpStaffActivity extends AppCompatActivity {
             gender = "Female";
         }
 
-        String profession = "staff";
+        String profession = "Staff";
 
         btnSignUp.setEnabled(false);
         String token = UUID.randomUUID().toString();
