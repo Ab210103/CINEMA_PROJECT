@@ -121,7 +121,7 @@ public class SignUpActivity extends AppCompatActivity {
         // Debug log
         Log.d("REGISTER_DATA", email + ", " + username + ", " + gender + ", " + profession + ", " + phone + ", hashedPwd: " + hashedPassword);
 
-        String tetoken = "4716791f-c555-4b63-a8e1-86a38925473e";
+        String tetoken = "200fb483-d224-43ab-ac20-9b83baa86509";
         // API call with MD5 password
         Call<Customer> call = custService.signUp(
                 tetoken,
