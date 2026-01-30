@@ -21,7 +21,7 @@ import retrofit2.http.Path;
 public interface MovieService {
 
     @GET("Movies")
-    Call<List<Movie>> getAllMovie(@Header("api-key") String api_key);
+    Call<List<Movie>> getAllMovie();
 
     @GET("Movies/{moviecode}")
     Call<Movie> getMovie(@Header("api-key") String api_key, @Path("moviecode") int id);

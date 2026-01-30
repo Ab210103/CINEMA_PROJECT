@@ -92,9 +92,9 @@ public class HomeFragment extends Fragment {
 
         String token = isLoggedIn
                 ? SharedPrefManager.getInstance(requireContext()).getToken()
-                : "200fb483-d224-43ab-ac20-9b83baa86509"; // public token
+                : "e0939abb-56f7-48b8-8c70-61ddc0304f42"; // public token
 
-        Call<List<Movie>> call = movieService.getAllMovie(token);
+        Call<List<Movie>> call = movieService.getAllMovie();
 
         call.enqueue(new Callback<List<Movie>>() {
             @Override

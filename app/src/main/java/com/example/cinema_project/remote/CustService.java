@@ -23,7 +23,6 @@ public interface CustService {
     @FormUrlEncoded
     @POST("users")
     Call<Customer> signUp(
-            @Header ("api-key") String apiKey,
             @Field("email") String email,
             @Field("username") String username,
             @Field("password") String password,

@@ -59,13 +59,13 @@ public class MovieFragment extends Fragment {
 
         // Use token if logged in, otherwise fallback token
         String apiKey = isLoggedIn ? SharedPrefManager.getInstance(requireContext()).getToken() : null;
-        String tetoken = "200fb483-d224-43ab-ac20-9b83baa86509";
+        String tetoken = "e0939abb-56f7-48b8-8c70-61ddc0304f42";
 
         Call<List<Movie>> call;
         if (apiKey != null) {
-            call = movieService.getAllMovie(apiKey);
+            call = movieService.getAllMovie();
         } else {
-            call = movieService.getAllMovie(tetoken);
+            call = movieService.getAllMovie();
         }
 
         call.enqueue(new Callback<List<Movie>>() {

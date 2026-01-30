@@ -71,7 +71,7 @@ public class StaffMovieListActivity extends AppCompatActivity {
         SharedPrefManager spm = new SharedPrefManager(getApplicationContext());
         String apiKey = spm.getToken();
 
-        movieService.getAllMovie(apiKey).enqueue(new Callback<List<Movie>>() {
+        movieService.getAllMovie().enqueue(new Callback<List<Movie>>() {
             @Override
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
                 Log.d("StaffMovieList", "Response: " + response.raw());
